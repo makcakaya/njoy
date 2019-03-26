@@ -9,7 +9,7 @@ namespace Njoy.Admin
     {
         public static void CustomAddIdentity(this IServiceCollection services)
         {
-            services.AddIdentity<AdminUser, IdentityRole>()
+            services.AddIdentity<AdminUser, AdminRole>()
                 .AddEntityFrameworkStores<AdminContext>()
                 .AddDefaultTokenProviders();
 
