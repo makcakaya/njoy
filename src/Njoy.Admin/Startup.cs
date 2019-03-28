@@ -1,14 +1,11 @@
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Njoy.Admin.Features;
 using SimpleInjector;
 using SimpleInjector.Lifestyles;
-using System.Threading;
 
 namespace Njoy.Admin
 {
@@ -27,7 +24,7 @@ namespace Njoy.Admin
         {
             _container = services.CustomAddSimpleInjector();
 
-            services.AddMediatR(typeof(Startup).Assembly);
+            //services.AddMediatR(typeof(Startup).Assembly);
 
             services.CustomAddContext(Configuration);
 
@@ -60,28 +57,20 @@ namespace Njoy.Admin
 
             _container.Verify();
 
-            var blocker = new ManualResetEvent(false);
-
-            {
-                var scope = AsyncScopedLifestyle.BeginScope(_container);
-                var userManager = _container.GetInstance<UserManager<AdminUser>>();
-                var feature = new CreateDefaultUserFeature(userManager);
-                feature.Run(new CreateDefaultUserParam
-                {
-                    Username = "root",
-                    Password = "Password@123"
-                }).ContinueWith((t) =>
-                {
-                    scope.Dispose();
-                    blocker.Set();
-                });
-            }
-
-            blocker.WaitOne();
-
             app.UseMvcWithDefaultRoute();
 
             app.CustomUseSpa(env);
+
+            RunCustomInitializationTasks();
+        }
+
+        private void RunCustomInitializationTasks()
+        {
+            using (AsyncScopedLifestyle.BeginScope(_container))
+            {
+                var mediator = _container.GetService<IMediator>();
+                CustomStartupTasksExtensions.CreateRootAccount(mediator);
+            }
         }
     }
 }
