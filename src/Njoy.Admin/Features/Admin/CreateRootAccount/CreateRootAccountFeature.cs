@@ -11,9 +11,9 @@ namespace Njoy.Admin.Features
     {
         public sealed class Handler : AsyncRequestHandler<Request>
         {
-            private readonly UserManager<AdminUser> _userManager;
+            private readonly UserManager<Admin.AdminUser> _userManager;
 
-            public Handler(UserManager<AdminUser> userManager)
+            public Handler(UserManager<Admin.AdminUser> userManager)
             {
                 _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             }
@@ -28,7 +28,7 @@ namespace Njoy.Admin.Features
                     return;
                 }
 
-                var user = new AdminUser
+                var user = new Admin.AdminUser
                 {
                     UserName = request.Username
                 };
