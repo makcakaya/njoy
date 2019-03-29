@@ -9,7 +9,7 @@ namespace Njoy.Admin
         public static void CreateRootAccount(IMediator mediator)
         {
             var blocker = new ManualResetEvent(false);
-            var request = new CreateRootAccountFeature.Request
+            var request = new CreateRootUserFeature.Request
             {
                 Username = "root",
                 Password = "Password@123"

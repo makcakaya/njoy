@@ -11,16 +11,14 @@ using System.Threading.Tasks;
 
 namespace Njoy.Admin.Features
 {
-    public sealed class EditAdminAccountFeature
+    public sealed class EditAdminUserFeature
     {
         public sealed class Handler : IRequestHandler<Request, AdminUserRowModel>
         {
-            private readonly IAdminContextFactory _contextFactory;
             private readonly UserManager<AdminUser> _userManager;
 
-            public Handler(IAdminContextFactory contextFactory, UserManager<AdminUser> userManager)
+            public Handler(UserManager<AdminUser> userManager)
             {
-                _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
                 _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             }
 

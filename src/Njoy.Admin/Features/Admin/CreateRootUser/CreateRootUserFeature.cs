@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Njoy.Admin.Features
 {
-    public sealed class CreateRootAccountFeature
+    public sealed class CreateRootUserFeature
     {
         public sealed class Handler : AsyncRequestHandler<Request>
         {
-            private readonly UserManager<Admin.AdminUser> _userManager;
+            private readonly UserManager<AdminUser> _userManager;
 
-            public Handler(UserManager<Admin.AdminUser> userManager)
+            public Handler(UserManager<AdminUser> userManager)
             {
                 _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             }
