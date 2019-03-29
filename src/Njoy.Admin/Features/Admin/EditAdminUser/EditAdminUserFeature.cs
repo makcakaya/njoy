@@ -40,9 +40,12 @@ namespace Njoy.Admin.Features
                 UpdateClaim(user, claims, ClaimTypes.GivenName, request.FirstName);
                 UpdateClaim(user, claims, ClaimTypes.Surname, request.LastName);
 
-                // Update password
-                var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-                ThrowIfFailed(result, "Updating password");
+                if (!string.IsNullOrEmpty(request.NewPassword))
+                {
+                    // Update password
+                    var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+                    ThrowIfFailed(result, "Updating password");
+                }
 
                 // Refresh claims
                 claims = await _userManager.GetClaimsAsync(user);
@@ -65,6 +68,11 @@ namespace Njoy.Admin.Features
                     if (claim != null)
                     {
                         var result = await _userManager.ReplaceClaimAsync(user, claim, new Claim(claimType, value));
+                        ThrowIfFailed(result, $"Updating claim {claimType}");
+                    }
+                    else
+                    {
+                        var result = await _userManager.AddClaimAsync(user, new Claim(claimType, value));
                         ThrowIfFailed(result, $"Updating claim {claimType}");
                     }
                 }
@@ -102,7 +110,8 @@ namespace Njoy.Admin.Features
 
             public bool IsValid()
             {
-                return NewPassword == NewPasswordConfirm;
+                return NewPassword == NewPasswordConfirm
+                    && (NewPassword != null ? CurrentPassword != null : true);
             }
         }
     }
