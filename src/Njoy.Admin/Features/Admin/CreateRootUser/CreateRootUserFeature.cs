@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Newtonsoft.Json;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,38 +11,34 @@ namespace Njoy.Admin.Features
         public sealed class Handler : AsyncRequestHandler<Request>
         {
             private readonly UserManager<AdminUser> _userManager;
+            private readonly RoleManager<AdminRole> _roleManager;
 
-            public Handler(UserManager<AdminUser> userManager)
+            public Handler(UserManager<AdminUser> userManager, RoleManager<AdminRole> roleManager)
             {
                 _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+                _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
             }
 
             protected async override Task Handle(Request request, CancellationToken cancellationToken)
             {
-                if (request is null) { throw new ArgumentNullException(nameof(request)); }
+                request = request ?? throw new ArgumentNullException(nameof(request));
 
                 var rootUserExists = (await _userManager.GetUsersInRoleAsync(AdminRole.Root)).Count > 0;
-                if (rootUserExists)
-                {
-                    return;
-                }
+                if (rootUserExists) { return; }
 
-                var user = new Admin.AdminUser
+                var user = new AdminUser
                 {
                     UserName = request.Username
                 };
 
-                var createResult = await _userManager.CreateAsync(user, request.Password);
-                if (!createResult.Succeeded)
+                IdentityAssert.ThrowIfFailed(await _userManager.CreateAsync(user, request.Password), "Create root user");
+
+                if (!await _roleManager.RoleExistsAsync(AdminRole.Root))
                 {
-                    throw new Exception($"{nameof(Handler)} failed with following errors: {JsonConvert.SerializeObject(createResult.Errors)}");
+                    IdentityAssert.ThrowIfFailed(await _roleManager.CreateAsync(new AdminRole { Name = AdminRole.Root }), "Create root role");
                 }
 
-                var roleResult = await _userManager.AddToRoleAsync(user, AdminRole.Root);
-                if (!roleResult.Succeeded)
-                {
-                    throw new Exception($"{nameof(Handler)} failed with following errors: {JsonConvert.SerializeObject(roleResult.Errors)}");
-                }
+                IdentityAssert.ThrowIfFailed(await _userManager.AddToRoleAsync(user, AdminRole.Root), "Add user to root role");
             }
         }
 
