@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Njoy.Admin.Features
 {
-    public sealed class CreateRootAccountFeature
+    public sealed class CreateRootUserFeature
     {
         public sealed class Handler : AsyncRequestHandler<Request>
         {
@@ -28,7 +28,7 @@ namespace Njoy.Admin.Features
                     return;
                 }
 
-                var user = new AdminUser
+                var user = new Admin.AdminUser
                 {
                     UserName = request.Username
                 };
