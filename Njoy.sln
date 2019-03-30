@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.489
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Njoy.Admin", "src\Njoy.Admin\Njoy.Admin.csproj", "{2EBABE20-EA9A-4334-8753-9E19888BB1FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Njoy.Admin", "src\Njoy.Admin\Njoy.Admin.csproj", "{2EBABE20-EA9A-4334-8753-9E19888BB1FD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2703181D-ECE4-4415-AFB4-2CEDB9E50187}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Njoy.Admin.IntegrationTests", "src\Njoy.Admin.IntegrationTests\Njoy.Admin.IntegrationTests.csproj", "{570D782E-D506-4531-899F-E0A55A50DC8E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +19,16 @@ Global
 		{2EBABE20-EA9A-4334-8753-9E19888BB1FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2EBABE20-EA9A-4334-8753-9E19888BB1FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2EBABE20-EA9A-4334-8753-9E19888BB1FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{570D782E-D506-4531-899F-E0A55A50DC8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{570D782E-D506-4531-899F-E0A55A50DC8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{570D782E-D506-4531-899F-E0A55A50DC8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{570D782E-D506-4531-899F-E0A55A50DC8E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{570D782E-D506-4531-899F-E0A55A50DC8E} = {2703181D-ECE4-4415-AFB4-2CEDB9E50187}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EF1E28A5-7EF9-47D5-86F6-1ECE2747D224}
