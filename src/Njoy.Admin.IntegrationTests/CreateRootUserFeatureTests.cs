@@ -12,7 +12,7 @@ namespace Njoy.Admin.IntegrationTests
         [Fact]
         public async void Can_Create_Root_User()
         {
-            var serviceProvider = new ServiceProviderHelper();
+            var serviceProvider = ServiceProviderHelper.CreateInstance<CreateRootUserFeature>();
             var userManager = serviceProvider.Get<UserManager<AdminUser>>();
             var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
 
@@ -34,7 +34,7 @@ namespace Njoy.Admin.IntegrationTests
         [Fact]
         public async void Created_Root_User_Has_Root_Role()
         {
-            var serviceProvider = new ServiceProviderHelper();
+            var serviceProvider = ServiceProviderHelper.CreateInstance<CreateRootUserFeature>();
             var userManager = serviceProvider.Get<UserManager<AdminUser>>();
             var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
 
@@ -58,7 +58,7 @@ namespace Njoy.Admin.IntegrationTests
         [Fact]
         public async void Does_Not_Create_Duplicate_Root_Users()
         {
-            var serviceProvider = new ServiceProviderHelper();
+            var serviceProvider = ServiceProviderHelper.CreateInstance<CreateRootUserFeature>();
             var userManager = serviceProvider.Get<UserManager<AdminUser>>();
             var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
 

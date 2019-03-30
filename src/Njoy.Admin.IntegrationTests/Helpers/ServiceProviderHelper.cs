@@ -8,7 +8,12 @@ namespace Njoy.Admin.IntegrationTests
     {
         private readonly ServiceProvider _serviceProvider;
 
-        public ServiceProviderHelper()
+        private ServiceProviderHelper(ServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
+
+        public static ServiceProviderHelper CreateInstance<T>()
         {
             var services = new ServiceCollection();
 
@@ -18,7 +23,7 @@ namespace Njoy.Admin.IntegrationTests
 
             services.AddDbContext<AdminContext>(options =>
             {
-                options.UseInMemoryDatabase(databaseName: $"{nameof(EditAdminUserFeatureTests)}");
+                options.UseInMemoryDatabase(databaseName: $"{nameof(T)}");
             });
 
             services.Configure<IdentityOptions>(options =>
@@ -32,7 +37,7 @@ namespace Njoy.Admin.IntegrationTests
                 options.User.RequireUniqueEmail = false;
             });
 
-            _serviceProvider = services.BuildServiceProvider();
+            return new ServiceProviderHelper(services.BuildServiceProvider());
         }
 
         public T Get<T>()
