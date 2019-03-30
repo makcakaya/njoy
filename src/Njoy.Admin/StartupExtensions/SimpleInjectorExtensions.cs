@@ -33,9 +33,8 @@ namespace Njoy.Admin
         {
             container.RegisterMvcControllers(app);
             container.RegisterMvcViewComponents(app);
-
             container.RegisterMediator();
-
+            container.RegisterNLog();
             container.AutoCrossWireAspNetComponents(app);
         }
     }
