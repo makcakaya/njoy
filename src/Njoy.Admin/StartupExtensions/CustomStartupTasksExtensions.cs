@@ -18,7 +18,7 @@ namespace Njoy.Admin
             var section = config.GetSection(SectionName);
             if (section is null) { return; }
 
-            var request = new CreateRootAccountFeature.Request
+            var request = new CreateRootUserFeature.Request
             {
                 Username = section[UsernameKey],
                 Password = section[PasswordKey]
