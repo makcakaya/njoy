@@ -16,17 +16,18 @@ namespace Njoy.Admin
             var blocker = new ManualResetEvent(false);
 
             var section = config.GetSection(SectionName);
+            if (section is null) { return; }
+
             var request = new CreateRootAccountFeature.Request
             {
                 Username = section[UsernameKey],
                 Password = section[PasswordKey]
             };
 
+            if (request.Username is null || request.Password is null) { return; }
+
             mediator.Send(request)
-                .ContinueWith((t) =>
-                {
-                    blocker.Set();
-                });
+                .ContinueWith((t) => blocker.Set());
 
             blocker.WaitOne();
         }
