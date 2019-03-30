@@ -44,7 +44,7 @@ namespace Njoy.Admin.Features
                 {
                     // Update password
                     var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-                    ThrowIfFailed(result, "Updating password");
+                    IdentityAssert.ThrowIfFailed(result, "Updating password");
                 }
 
                 // Refresh claims
@@ -68,21 +68,13 @@ namespace Njoy.Admin.Features
                     if (claim != null)
                     {
                         var result = await _userManager.ReplaceClaimAsync(user, claim, new Claim(claimType, value));
-                        ThrowIfFailed(result, $"Updating claim {claimType}");
+                        IdentityAssert.ThrowIfFailed(result, $"Updating claim {claimType}");
                     }
                     else
                     {
                         var result = await _userManager.AddClaimAsync(user, new Claim(claimType, value));
-                        ThrowIfFailed(result, $"Updating claim {claimType}");
+                        IdentityAssert.ThrowIfFailed(result, $"Updating claim {claimType}");
                     }
-                }
-            }
-
-            public void ThrowIfFailed(IdentityResult result, string operation)
-            {
-                if (!result.Succeeded)
-                {
-                    throw new Exception($"{operation} failed. Errors: {JsonConvert.SerializeObject(result.Errors)}");
                 }
             }
         }
