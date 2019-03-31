@@ -24,8 +24,6 @@ namespace Njoy.Admin
         {
             _container = services.CustomAddSimpleInjector();
 
-            //services.AddMediatR(typeof(Startup).Assembly);
-
             services.CustomAddContext(Configuration);
 
             services.CustomAddIdentity();
@@ -48,14 +46,12 @@ namespace Njoy.Admin
             }
 
             app.CustomUseSimpleInjector(_container);
+            app.CustomUseIdentity();
+            _container.Verify();
 
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
-
-            app.CustomUseIdentity();
-
-            _container.Verify();
 
             app.UseMvcWithDefaultRoute();
 

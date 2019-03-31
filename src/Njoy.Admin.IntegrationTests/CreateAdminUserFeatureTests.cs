@@ -1,12 +1,7 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Njoy.Admin.Features.Admin.CreateAdminUser;
+﻿using Microsoft.AspNetCore.Identity;
+using Njoy.Admin.Features;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using Xunit;
 

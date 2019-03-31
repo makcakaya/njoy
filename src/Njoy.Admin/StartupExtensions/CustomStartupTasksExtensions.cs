@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using Njoy.Admin.Features;
+using System;
 using System.Threading;
 
 namespace Njoy.Admin
@@ -26,10 +27,23 @@ namespace Njoy.Admin
 
             if (request.Username is null || request.Password is null) { return; }
 
+            Exception exception = null;
             mediator.Send(request)
-                .ContinueWith((t) => blocker.Set());
+                .ContinueWith((t) =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        exception = t.Exception;
+                    }
+                    blocker.Set();
+                });
 
             blocker.WaitOne();
+
+            if (exception != null)
+            {
+                throw new Exception($"{nameof(CreateRootAccount)} failed.", exception);
+            }
         }
     }
 }

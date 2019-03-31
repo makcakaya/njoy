@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Njoy.Admin.Features.Admin.CreateAdminUser
+namespace Njoy.Admin.Features
 {
     public sealed class CreateAdminUserFeature
     {
@@ -44,7 +44,7 @@ namespace Njoy.Admin.Features.Admin.CreateAdminUser
 
                 var createResult = await _userManager.CreateAsync(user, request.NewPassword);
                 IdentityAssert.ThrowIfFailed(createResult, "Create user");
-                                
+
                 // Add claims; FirstName, LastName
                 AddClaim(user, ClaimTypes.GivenName, request.FirstName);
                 AddClaim(user, ClaimTypes.Surname, request.LastName);

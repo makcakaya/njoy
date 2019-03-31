@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Njoy.Admin.Features
 {
@@ -23,22 +24,27 @@ namespace Njoy.Admin.Features
             {
                 request = request ?? throw new ArgumentNullException(nameof(request));
 
-                var rootUserExists = (await _userManager.GetUsersInRoleAsync(AdminRole.Root)).Count > 0;
-                if (rootUserExists) { return; }
-
-                var user = new AdminUser
+                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    UserName = request.Username
-                };
+                    var rootUserExists = (await _userManager.GetUsersInRoleAsync(AdminRole.Root)).Count > 0;
+                    if (rootUserExists) { return; }
 
-                IdentityAssert.ThrowIfFailed(await _userManager.CreateAsync(user, request.Password), "Create root user");
+                    var user = new AdminUser
+                    {
+                        UserName = request.Username
+                    };
 
-                if (!await _roleManager.RoleExistsAsync(AdminRole.Root))
-                {
-                    IdentityAssert.ThrowIfFailed(await _roleManager.CreateAsync(new AdminRole { Name = AdminRole.Root }), "Create root role");
+                    IdentityAssert.ThrowIfFailed(await _userManager.CreateAsync(user, request.Password), "Create root user");
+
+                    if (!await _roleManager.RoleExistsAsync(AdminRole.Root))
+                    {
+                        IdentityAssert.ThrowIfFailed(await _roleManager.CreateAsync(new AdminRole { Name = AdminRole.Root }), "Create root role");
+                    }
+
+                    IdentityAssert.ThrowIfFailed(await _userManager.AddToRoleAsync(user, AdminRole.Root), "Add user to root role");
+
+                    transaction.Complete();
                 }
-
-                IdentityAssert.ThrowIfFailed(await _userManager.AddToRoleAsync(user, AdminRole.Root), "Add user to root role");
             }
         }
 
