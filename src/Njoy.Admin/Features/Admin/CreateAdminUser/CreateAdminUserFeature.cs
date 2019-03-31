@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Njoy.Admin.Features
 {
@@ -30,43 +31,46 @@ namespace Njoy.Admin.Features
                     throw new Exception("Request is not valid.");
                 }
 
-                var existingUser = _userManager.Users.FirstOrDefault(u => u.UserName == request.Username);
-                if (existingUser != null)
+                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    throw new Exception($"{nameof(AdminUser)} with {request.Username} already exist.");
+                    var existingUser = _userManager.Users.FirstOrDefault(u => u.UserName == request.Username);
+                    if (existingUser != null)
+                    {
+                        throw new Exception($"{nameof(AdminUser)} with {request.Username} already exist.");
+                    }
+
+                    var user = new AdminUser
+                    {
+                        UserName = request.Username,
+                        Email = request.Email,
+                    };
+
+                    IdentityAssert.ThrowIfFailed(await _userManager.CreateAsync(user, request.NewPassword), "Create user");
+
+                    // Add claims; FirstName, LastName
+                    AddClaim(user, ClaimTypes.GivenName, request.FirstName);
+                    AddClaim(user, ClaimTypes.Surname, request.LastName);
+
+                    if (!await _roleManager.RoleExistsAsync(AdminRole.Sales))
+                    {
+                        IdentityAssert.ThrowIfFailed(await _roleManager.CreateAsync(new AdminRole { Name = AdminRole.Sales }), "Create Sales role");
+                    }
+
+                    IdentityAssert.ThrowIfFailed(await _userManager.AddToRoleAsync(user, AdminRole.Sales), "Add user to Sales role");
+
+                    transaction.Complete();
+
+                    // Get fresh claims
+                    var claims = await _userManager.GetClaimsAsync(user);
+                    return new AdminUserRowModel
+                    {
+                        Id = user.Id,
+                        Username = user.UserName,
+                        FirstName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
+                        LastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value,
+                        Email = user.Email
+                    };
                 }
-
-                var user = new AdminUser
-                {
-                    UserName = request.Username,
-                    Email = request.Email,
-                };
-
-                var createResult = await _userManager.CreateAsync(user, request.NewPassword);
-                IdentityAssert.ThrowIfFailed(createResult, "Create user");
-
-                // Add claims; FirstName, LastName
-                AddClaim(user, ClaimTypes.GivenName, request.FirstName);
-                AddClaim(user, ClaimTypes.Surname, request.LastName);
-
-                if (!await _roleManager.RoleExistsAsync(AdminRole.Sales))
-                {
-                    IdentityAssert.ThrowIfFailed(await _roleManager.CreateAsync(new AdminRole { Name = AdminRole.Sales }), "Create Sales role");
-                }
-
-                IdentityAssert.ThrowIfFailed(await _userManager.AddToRoleAsync(user, AdminRole.Sales), "Add user to Sales role");
-
-                // get claims
-                var claims = await _userManager.GetClaimsAsync(user);
-
-                return new AdminUserRowModel
-                {
-                    Id = user.Id,
-                    Username = user.UserName,
-                    FirstName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
-                    LastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value,
-                    Email = user.Email
-                };
             }
 
             private async void AddClaim(AdminUser user, string claimType, string value)

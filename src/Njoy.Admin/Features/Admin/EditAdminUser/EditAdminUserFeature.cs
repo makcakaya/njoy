@@ -8,6 +8,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Njoy.Admin.Features
 {
@@ -24,40 +25,41 @@ namespace Njoy.Admin.Features
 
             public async Task<AdminUserRowModel> Handle(Request request, CancellationToken cancellationToken)
             {
-                if (!request.IsValid())
+                if (!request.IsValid()) { throw new Exception("Request is not valid."); }
+
+                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    throw new Exception("Request is not valid.");
+                    var user = await _userManager.FindByIdAsync(request.Id);
+                    if (user is null)
+                    {
+                        throw new Exception($"{nameof(AdminUser)} with Id of {request.Id} does not exist.");
+                    }
+
+                    // Update claims; FirstName, LastName
+                    var claims = await _userManager.GetClaimsAsync(user);
+                    UpdateClaim(user, claims, ClaimTypes.GivenName, request.FirstName);
+                    UpdateClaim(user, claims, ClaimTypes.Surname, request.LastName);
+
+                    if (!string.IsNullOrEmpty(request.NewPassword))
+                    {
+                        // Update password
+                        var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+                        IdentityAssert.ThrowIfFailed(result, "Updating password");
+                    }
+
+                    transaction.Complete();
+
+                    // Refresh claims
+                    claims = await _userManager.GetClaimsAsync(user);
+                    return new AdminUserRowModel
+                    {
+                        Id = user.Id,
+                        Username = user.UserName,
+                        FirstName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
+                        LastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value,
+                        Email = user.Email
+                    };
                 }
-
-                var user = await _userManager.FindByIdAsync(request.Id);
-                if (user is null)
-                {
-                    throw new Exception($"{nameof(AdminUser)} with Id of {request.Id} does not exist.");
-                }
-
-                // Update claims; FirstName, LastName
-                var claims = await _userManager.GetClaimsAsync(user);
-                UpdateClaim(user, claims, ClaimTypes.GivenName, request.FirstName);
-                UpdateClaim(user, claims, ClaimTypes.Surname, request.LastName);
-
-                if (!string.IsNullOrEmpty(request.NewPassword))
-                {
-                    // Update password
-                    var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-                    IdentityAssert.ThrowIfFailed(result, "Updating password");
-                }
-
-                // Refresh claims
-                claims = await _userManager.GetClaimsAsync(user);
-
-                return new AdminUserRowModel
-                {
-                    Id = user.Id,
-                    Username = user.UserName,
-                    FirstName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
-                    LastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value,
-                    Email = user.Email
-                };
             }
 
             private async void UpdateClaim(AdminUser user, IEnumerable<Claim> claims, string claimType, string value)
