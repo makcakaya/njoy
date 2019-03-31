@@ -38,6 +38,7 @@ namespace Njoy.Admin
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseStatusCodePages();
             }
             else
             {
@@ -45,13 +46,12 @@ namespace Njoy.Admin
                 app.UseHsts();
             }
 
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
             app.CustomUseSimpleInjector(_container);
             app.CustomUseIdentity();
             _container.Verify();
-
-            app.UseHttpsRedirection();
-
-            app.UseStaticFiles();
 
             app.UseMvcWithDefaultRoute();
 
