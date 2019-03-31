@@ -26,7 +26,7 @@ namespace Njoy.Admin.Features
             {
                 if (!request.IsValid())
                 {
-                    throw new Exception("Request is not valid.");
+                    throw new ArgumentException("Request is not valid.");
                 }
 
                 var user = await _userManager.FindByIdAsync(request.Id);

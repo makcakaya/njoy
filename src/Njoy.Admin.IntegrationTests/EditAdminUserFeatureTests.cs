@@ -108,7 +108,7 @@ namespace Njoy.Admin.IntegrationTests
                 NewPasswordConfirm = newPassword
             };
 
-            await Assert.ThrowsAsync<Exception>(async () => await handler.Handle(request, new CancellationToken()));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await handler.Handle(request, new CancellationToken()));
         }
 
         private UserManager<AdminUser> GetUserManager()

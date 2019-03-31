@@ -27,7 +27,7 @@ namespace Njoy.Admin.Features
             {
                 if (!request.IsValid())
                 {
-                    throw new Exception("Request is not valid.");
+                    throw new ArgumentException("Request is not valid.");
                 }
 
                 var existingUser = _userManager.Users.FirstOrDefault(u => u.UserName == request.Username);
