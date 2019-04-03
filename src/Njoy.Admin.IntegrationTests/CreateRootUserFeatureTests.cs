@@ -14,10 +14,7 @@ namespace Njoy.Admin.IntegrationTests
         {
             var serviceProvider = ServiceProviderHelper.CreateInstance<CreateRootUserFeature>();
             var userManager = serviceProvider.Get<UserManager<AdminUser>>();
-            var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
-
-            var handler = new CreateRootUserFeature.Handler(userManager, roleManager)
-                as IRequestHandler<CreateRootUserFeature.Request, Unit>;
+            var handler = GetHandler(serviceProvider) as IRequestHandler<CreateRootUserFeature.Request, Unit>;
 
             var request = new CreateRootUserFeature.Request
             {
@@ -36,10 +33,7 @@ namespace Njoy.Admin.IntegrationTests
         {
             var serviceProvider = ServiceProviderHelper.CreateInstance<CreateRootUserFeature>();
             var userManager = serviceProvider.Get<UserManager<AdminUser>>();
-            var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
-
-            var handler = new CreateRootUserFeature.Handler(userManager, roleManager)
-                as IRequestHandler<CreateRootUserFeature.Request, Unit>;
+            var handler = GetHandler(serviceProvider) as IRequestHandler<CreateRootUserFeature.Request, Unit>;
 
             var request = new CreateRootUserFeature.Request
             {
@@ -60,10 +54,7 @@ namespace Njoy.Admin.IntegrationTests
         {
             var serviceProvider = ServiceProviderHelper.CreateInstance<CreateRootUserFeature>();
             var userManager = serviceProvider.Get<UserManager<AdminUser>>();
-            var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
-
-            var handler = new CreateRootUserFeature.Handler(userManager, roleManager)
-                as IRequestHandler<CreateRootUserFeature.Request, Unit>;
+            var handler = GetHandler(serviceProvider) as IRequestHandler<CreateRootUserFeature.Request, Unit>;
 
             var request = new CreateRootUserFeature.Request
             {
@@ -79,6 +70,15 @@ namespace Njoy.Admin.IntegrationTests
             var rootUsers = await userManager.GetUsersInRoleAsync(AdminRole.Root);
 
             Assert.Single(rootUsers);
+        }
+
+        private CreateRootUserFeature.Handler GetHandler(ServiceProviderHelper serviceProvider)
+        {
+            var context = serviceProvider.Get<AdminContext>();
+            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
+            var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
+
+            return new CreateRootUserFeature.Handler(context, userManager, roleManager);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Njoy.Admin.IntegrationTests
@@ -24,6 +25,7 @@ namespace Njoy.Admin.IntegrationTests
 
             services.AddDbContext<AdminContext>(options =>
             {
+                options.ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 var result = useSqlServer ? options.UseSqlServer(SqlConnectionString)
                     : options.UseInMemoryDatabase(databaseName: $"{nameof(T)}");
             });

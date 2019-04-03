@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Njoy.Admin.Features;
 using System;
 using System.Threading;
@@ -13,7 +11,8 @@ namespace Njoy.Admin.IntegrationTests
         [Fact]
         public async void Can_Add_Claims()
         {
-            var userManager = GetUserManager();
+            var serviceProvider = ServiceProviderHelper.CreateInstance<EditAdminUserFeatureTests>();
+            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
 
             var user = new AdminUser
             {
@@ -26,7 +25,6 @@ namespace Njoy.Admin.IntegrationTests
             Assert.True(identityResult.Succeeded);
             Assert.NotEmpty(user.Id);
 
-            var handler = new EditAdminUserFeature.Handler(userManager);
             var request = new EditAdminUserFeature.Request
             {
                 Id = user.Id,
@@ -34,6 +32,7 @@ namespace Njoy.Admin.IntegrationTests
                 LastName = "Last"
             };
 
+            var handler = GetHandler(serviceProvider);
             var result = await handler.Handle(request, new CancellationToken());
 
             Assert.NotNull(result);
@@ -44,7 +43,8 @@ namespace Njoy.Admin.IntegrationTests
         [Fact]
         public async void Can_Change_Password()
         {
-            var userManager = GetUserManager();
+            var serviceProvider = ServiceProviderHelper.CreateInstance<EditAdminUserFeatureTests>();
+            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
 
             var user = new AdminUser
             {
@@ -58,7 +58,6 @@ namespace Njoy.Admin.IntegrationTests
             Assert.True(identityResult.Succeeded);
             Assert.NotEmpty(user.Id);
 
-            var handler = new EditAdminUserFeature.Handler(userManager);
             var request = new EditAdminUserFeature.Request
             {
                 Id = user.Id,
@@ -69,6 +68,7 @@ namespace Njoy.Admin.IntegrationTests
                 NewPasswordConfirm = newPassword
             };
 
+            var handler = GetHandler(serviceProvider);
             var result = await handler.Handle(request, new CancellationToken());
             Assert.NotNull(result);
 
@@ -84,7 +84,8 @@ namespace Njoy.Admin.IntegrationTests
         [Fact]
         public async void Change_Password_Throws_If_Current_Password_Not_Provided()
         {
-            var userManager = GetUserManager();
+            var serviceProvider = ServiceProviderHelper.CreateInstance<EditAdminUserFeature>();
+            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
 
             var user = new AdminUser
             {
@@ -98,7 +99,6 @@ namespace Njoy.Admin.IntegrationTests
             Assert.True(identityResult.Succeeded);
             Assert.NotEmpty(user.Id);
 
-            var handler = new EditAdminUserFeature.Handler(userManager);
             var request = new EditAdminUserFeature.Request
             {
                 Id = user.Id,
@@ -107,35 +107,15 @@ namespace Njoy.Admin.IntegrationTests
                 NewPassword = newPassword,
                 NewPasswordConfirm = newPassword
             };
-
+            var handler = GetHandler(serviceProvider);
             await Assert.ThrowsAsync<Exception>(async () => await handler.Handle(request, new CancellationToken()));
         }
 
-        private UserManager<AdminUser> GetUserManager()
+        private EditAdminUserFeature.Handler GetHandler(ServiceProviderHelper serviceProvider)
         {
-            var services = new ServiceCollection();
-
-            services.AddIdentity<AdminUser, AdminRole>()
-                         .AddEntityFrameworkStores<AdminContext>()
-                         .AddDefaultTokenProviders();
-
-            services.AddDbContext<AdminContext>(options =>
-            {
-                options.UseInMemoryDatabase(databaseName: $"{nameof(EditAdminUserFeatureTests)}");
-            });
-
-            services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
-                options.User.RequireUniqueEmail = false;
-            });
-
-            return services.BuildServiceProvider().GetService<UserManager<AdminUser>>();
+            var context = serviceProvider.Get<AdminContext>();
+            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
+            return new EditAdminUserFeature.Handler(context, userManager);
         }
     }
 }
