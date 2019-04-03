@@ -107,8 +107,9 @@ namespace Njoy.Admin.IntegrationTests
                 NewPassword = newPassword,
                 NewPasswordConfirm = newPassword
             };
+
             var handler = GetHandler(serviceProvider);
-            await Assert.ThrowsAsync<Exception>(async () => await handler.Handle(request, new CancellationToken()));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await handler.Handle(request, new CancellationToken()));
         }
 
         private EditAdminUserFeature.Handler GetHandler(ServiceProviderHelper serviceProvider)

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Newtonsoft.Json;
 using System;
 
 namespace Njoy.Admin.Features
@@ -13,7 +12,7 @@ namespace Njoy.Admin.Features
 
             if (!result.Succeeded)
             {
-                throw new Exception($"{operation} failed. Errors: {JsonConvert.SerializeObject(result.Errors)}");
+                throw new OperationFailedException(operation, result.Errors);
             }
         }
     }
