@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 
 namespace Njoy.Admin.Features
 {
@@ -11,11 +10,13 @@ namespace Njoy.Admin.Features
     {
         public sealed class Handler : AsyncRequestHandler<Request>
         {
+            private readonly AdminContext _context;
             private readonly UserManager<AdminUser> _userManager;
             private readonly RoleManager<AdminRole> _roleManager;
 
-            public Handler(UserManager<AdminUser> userManager, RoleManager<AdminRole> roleManager)
+            public Handler(AdminContext context, UserManager<AdminUser> userManager, RoleManager<AdminRole> roleManager)
             {
+                _context = context ?? throw new ArgumentNullException(nameof(context));
                 _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
                 _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
             }
@@ -24,7 +25,7 @@ namespace Njoy.Admin.Features
             {
                 request = request ?? throw new ArgumentNullException(nameof(request));
 
-                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
                     var rootUserExists = (await _userManager.GetUsersInRoleAsync(AdminRole.Root)).Count > 0;
                     if (rootUserExists) { return; }
@@ -43,7 +44,7 @@ namespace Njoy.Admin.Features
 
                     IdentityAssert.ThrowIfFailed(await _userManager.AddToRoleAsync(user, AdminRole.Root), "Add user to root role");
 
-                    transaction.Complete();
+                    transaction.Commit();
                 }
             }
         }

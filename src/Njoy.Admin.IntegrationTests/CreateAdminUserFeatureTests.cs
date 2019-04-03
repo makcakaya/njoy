@@ -14,9 +14,7 @@ namespace Njoy.Admin.IntegrationTests
         {
             var serviceProvider = ServiceProviderHelper.CreateInstance<CreateAdminUserFeature>();
             var userManager = serviceProvider.Get<UserManager<AdminUser>>();
-            var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
-
-            var handler = new CreateAdminUserFeature.Handler(userManager, roleManager);
+            var handler = GetHandler(serviceProvider);
 
             var request = new CreateAdminUserFeature.Request
             {
@@ -41,12 +39,6 @@ namespace Njoy.Admin.IntegrationTests
         [Fact]
         public async void Do_Not_Create_With_Existing_Username()
         {
-            var serviceProvider = ServiceProviderHelper.CreateInstance<CreateAdminUserFeature>();
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
-            var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
-
-            var handler = new CreateAdminUserFeature.Handler(userManager, roleManager);
-
             var request = new CreateAdminUserFeature.Request
             {
                 Username = "adminuser1",
@@ -54,9 +46,19 @@ namespace Njoy.Admin.IntegrationTests
                 NewPasswordConfirm = "testP@ssword!1"
             };
 
+            var handler = GetHandler(ServiceProviderHelper.CreateInstance<CreateAdminUserFeatureTests>());
+
             await handler.Handle(request, new CancellationToken());
 
             await Assert.ThrowsAsync<Exception>(async () => await handler.Handle(request, new CancellationToken()));
+        }
+
+        private CreateAdminUserFeature.Handler GetHandler(ServiceProviderHelper serviceProvider)
+        {
+            var context = serviceProvider.Get<AdminContext>();
+            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
+            var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
+            return new CreateAdminUserFeature.Handler(context, userManager, roleManager);
         }
     }
 }
