@@ -4,8 +4,8 @@ namespace Njoy.Admin
 {
     public sealed class AdminRole : IdentityRole
     {
-        public static readonly string Standart = "Standart";
-        public static readonly string Root = "Root";
-        public static readonly string Sales = "Sales";
+        public const string Standart = "Standart";
+        public const string Root = "Root";
+        public const string Sales = "Sales";
     }
 }

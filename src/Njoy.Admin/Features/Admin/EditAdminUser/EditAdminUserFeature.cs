@@ -15,10 +15,12 @@ namespace Njoy.Admin.Features
     {
         public sealed class Handler : IRequestHandler<Request, AdminUserRowModel>
         {
+            private readonly AdminContext _context;
             private readonly UserManager<AdminUser> _userManager;
 
-            public Handler(UserManager<AdminUser> userManager)
+            public Handler(AdminContext context, UserManager<AdminUser> userManager)
             {
+                _context = context ?? throw new ArgumentNullException(nameof(context));
                 _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             }
 
@@ -29,35 +31,38 @@ namespace Njoy.Admin.Features
                     throw new ArgumentException("Request is not valid.");
                 }
 
-                var user = await _userManager.FindByIdAsync(request.Id);
-                if (user is null)
+                using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
-                    throw new Exception($"{nameof(AdminUser)} with Id of {request.Id} does not exist.");
+                    var user = await _userManager.FindByIdAsync(request.Id);
+                    if (user is null)
+                    {
+                        throw new Exception($"{nameof(AdminUser)} with Id of {request.Id} does not exist.");
+                    }
+
+                    // Update claims; FirstName, LastName
+                    var claims = await _userManager.GetClaimsAsync(user);
+                    UpdateClaim(user, claims, ClaimTypes.GivenName, request.FirstName);
+                    UpdateClaim(user, claims, ClaimTypes.Surname, request.LastName);
+
+                    if (!string.IsNullOrEmpty(request.NewPassword))
+                    {
+                        // Update password
+                        var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+                        IdentityAssert.ThrowIfFailed(result, "Updating password");
+                    }
+
+                    transaction.Commit();
+
+                    claims = await _userManager.GetClaimsAsync(user);
+                    return new AdminUserRowModel
+                    {
+                        Id = user.Id,
+                        Username = user.UserName,
+                        FirstName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
+                        LastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value,
+                        Email = user.Email
+                    };
                 }
-
-                // Update claims; FirstName, LastName
-                var claims = await _userManager.GetClaimsAsync(user);
-                UpdateClaim(user, claims, ClaimTypes.GivenName, request.FirstName);
-                UpdateClaim(user, claims, ClaimTypes.Surname, request.LastName);
-
-                if (!string.IsNullOrEmpty(request.NewPassword))
-                {
-                    // Update password
-                    var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-                    IdentityAssert.ThrowIfFailed(result, "Updating password");
-                }
-
-                // Refresh claims
-                claims = await _userManager.GetClaimsAsync(user);
-
-                return new AdminUserRowModel
-                {
-                    Id = user.Id,
-                    Username = user.UserName,
-                    FirstName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
-                    LastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value,
-                    Email = user.Email
-                };
             }
 
             private async void UpdateClaim(AdminUser user, IEnumerable<Claim> claims, string claimType, string value)

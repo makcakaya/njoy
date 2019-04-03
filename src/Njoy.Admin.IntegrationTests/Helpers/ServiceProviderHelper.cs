@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Njoy.Admin.IntegrationTests
 {
     public class ServiceProviderHelper
     {
+        private static readonly string SqlConnectionString = "Server=localhost; Database=Njoy.Test; Trusted_Connection=true";
         private readonly ServiceProvider _serviceProvider;
 
         private ServiceProviderHelper(ServiceProvider serviceProvider)
@@ -13,7 +15,7 @@ namespace Njoy.Admin.IntegrationTests
             _serviceProvider = serviceProvider;
         }
 
-        public static ServiceProviderHelper CreateInstance<T>()
+        public static ServiceProviderHelper CreateInstance<T>(bool useSqlServer = false)
         {
             var services = new ServiceCollection();
 
@@ -23,7 +25,9 @@ namespace Njoy.Admin.IntegrationTests
 
             services.AddDbContext<AdminContext>(options =>
             {
-                options.UseInMemoryDatabase(databaseName: $"{nameof(T)}");
+                options.ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+                var result = useSqlServer ? options.UseSqlServer(SqlConnectionString)
+                    : options.UseInMemoryDatabase(databaseName: $"{nameof(T)}");
             });
 
             services.Configure<IdentityOptions>(options =>

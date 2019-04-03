@@ -14,11 +14,13 @@ namespace Njoy.Admin.Features
     {
         public sealed class Handler : IRequestHandler<Request, AdminUserRowModel>
         {
+            private readonly AdminContext _context;
             private readonly UserManager<AdminUser> _userManager;
             private readonly RoleManager<AdminRole> _roleManager;
 
-            public Handler(UserManager<AdminUser> userManager, RoleManager<AdminRole> roleManager)
+            public Handler(AdminContext context, UserManager<AdminUser> userManager, RoleManager<AdminRole> roleManager)
             {
+                _context = context ?? throw new ArgumentNullException(nameof(context));
                 _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
                 _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
             }
@@ -30,43 +32,43 @@ namespace Njoy.Admin.Features
                     throw new ArgumentException("Request is not valid.");
                 }
 
-                var existingUser = _userManager.Users.FirstOrDefault(u => u.UserName == request.Username);
-                if (existingUser != null)
+                using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
-                    throw new Exception($"{nameof(AdminUser)} with {request.Username} already exist.");
+                    if (_userManager.Users.Any(u => u.UserName == request.Username))
+                    {
+                        throw new Exception($"{nameof(AdminUser)} with {request.Username} already exist.");
+                    }
+
+                    var user = new AdminUser
+                    {
+                        UserName = request.Username,
+                        Email = request.Email,
+                    };
+
+                    IdentityAssert.ThrowIfFailed(await _userManager.CreateAsync(user, request.NewPassword), "Create user");
+
+                    // Add claims; FirstName, LastName
+                    AddClaim(user, ClaimTypes.GivenName, request.FirstName);
+                    AddClaim(user, ClaimTypes.Surname, request.LastName);
+
+                    if (!await _roleManager.RoleExistsAsync(AdminRole.Sales))
+                    {
+                        IdentityAssert.ThrowIfFailed(await _roleManager.CreateAsync(new AdminRole { Name = AdminRole.Sales }), "Create Sales role");
+                    }
+
+                    IdentityAssert.ThrowIfFailed(await _userManager.AddToRoleAsync(user, AdminRole.Sales), "Add user to Sales role");
+                    transaction.Commit();
+
+                    var claims = await _userManager.GetClaimsAsync(user);
+                    return new AdminUserRowModel
+                    {
+                        Id = user.Id,
+                        Username = user.UserName,
+                        FirstName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
+                        LastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value,
+                        Email = user.Email
+                    };
                 }
-
-                var user = new AdminUser
-                {
-                    UserName = request.Username,
-                    Email = request.Email,
-                };
-
-                var createResult = await _userManager.CreateAsync(user, request.NewPassword);
-                IdentityAssert.ThrowIfFailed(createResult, "Create user");
-
-                // Add claims; FirstName, LastName
-                AddClaim(user, ClaimTypes.GivenName, request.FirstName);
-                AddClaim(user, ClaimTypes.Surname, request.LastName);
-
-                if (!await _roleManager.RoleExistsAsync(AdminRole.Sales))
-                {
-                    IdentityAssert.ThrowIfFailed(await _roleManager.CreateAsync(new AdminRole { Name = AdminRole.Sales }), "Create Sales role");
-                }
-
-                IdentityAssert.ThrowIfFailed(await _userManager.AddToRoleAsync(user, AdminRole.Sales), "Add user to Sales role");
-
-                // get claims
-                var claims = await _userManager.GetClaimsAsync(user);
-
-                return new AdminUserRowModel
-                {
-                    Id = user.Id,
-                    Username = user.UserName,
-                    FirstName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
-                    LastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value,
-                    Email = user.Email
-                };
             }
 
             private async void AddClaim(AdminUser user, string claimType, string value)
