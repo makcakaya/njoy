@@ -29,5 +29,12 @@ namespace Njoy.Admin
         {
             return await _mediator.Send(request);
         }
+
+        [HttpPost, Route("login")]
+        [AllowAnonymous]
+        public async Task<string> Login(LoginAdminUserFeature.Request request)
+        {
+            return await _mediator.Send(request);
+        }
     }
 }

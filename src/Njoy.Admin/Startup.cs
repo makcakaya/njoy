@@ -12,10 +12,12 @@ namespace Njoy.Admin
     public class Startup
     {
         private Container _container;
+        private readonly JwtSettings _jwtSettings;
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            _jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
         }
 
         public IConfiguration Configuration { get; }
@@ -26,7 +28,7 @@ namespace Njoy.Admin
 
             services.CustomAddContext(Configuration);
 
-            services.CustomAddIdentity();
+            services.CustomAddIdentity(_jwtSettings);
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
@@ -49,7 +51,7 @@ namespace Njoy.Admin
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.CustomUseSimpleInjector(_container);
+            app.CustomUseSimpleInjector(_container, Configuration);
             app.CustomUseIdentity();
             _container.Verify();
 
