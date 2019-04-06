@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace Njoy.Admin
 {
-    [Authorize]
     [ApiController, Route("api/[controller]")]
     public sealed class AdminUserController : ControllerBase
     {
