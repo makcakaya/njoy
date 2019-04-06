@@ -17,14 +17,14 @@ namespace Njoy.Admin
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        [HttpPost]
-        public async Task<AdminUserRowModel> Update(EditAdminUserFeature.Request request)
+        [HttpPost, Route("create")]
+        public async Task<AdminUserRowModel> Create(CreateAdminUserFeature.Request request)
         {
             return await _mediator.Send(request);
         }
 
-        [HttpPost, Route("create")]
-        public async Task<AdminUserRowModel> Create(CreateAdminUserFeature.Request request)
+        [HttpPost, Route("update")]
+        public async Task<AdminUserRowModel> Update(EditAdminUserFeature.Request request)
         {
             return await _mediator.Send(request);
         }
