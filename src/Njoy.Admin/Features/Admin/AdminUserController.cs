@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Njoy.Admin.Features;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Njoy.Admin
@@ -25,6 +26,12 @@ namespace Njoy.Admin
 
         [HttpPost, Route("update")]
         public async Task<AdminUserRowModel> Update(EditAdminUserFeature.Request request)
+        {
+            return await _mediator.Send(request);
+        }
+
+        [HttpGet, Route("list")]
+        public async Task<List<AdminUserRowModel>> List(ListAdminUsersFeature.Request request)
         {
             return await _mediator.Send(request);
         }
