@@ -11,8 +11,8 @@ namespace Njoy.Admin.UnitTests
         [Fact]
         public void Can_Generate_Token()
         {
-            var service = new JwtService();
-            var token = service.GenerateToken(Username, Password, Secret);
+            var service = new JwtService(new JwtSettings { Secret = Secret });
+            var token = service.GenerateToken(Username, Password);
 
             Assert.NotEmpty(token);
         }

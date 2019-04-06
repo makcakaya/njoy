@@ -44,6 +44,7 @@ namespace Njoy.Admin
 
             var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
             container.RegisterInstance(jwtSettings);
+            container.Verify();
         }
     }
 }
