@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Text;
 
 namespace Njoy.Admin
 {
     public static class IdentityExtensions
     {
-        public static void CustomAddIdentity(this IServiceCollection services)
+        public static void CustomAddIdentity(this IServiceCollection services, JwtSettings jwtSettings)
         {
             services.AddIdentity<AdminUser, AdminRole>()
                 .AddEntityFrameworkStores<AdminContext>()
@@ -29,19 +32,32 @@ namespace Njoy.Admin
                 options.User.RequireUniqueEmail = false;
             });
 
-            services.ConfigureApplicationCookie(options =>
+            services.AddAuthentication(config =>
             {
-                options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-                options.SlidingExpiration = true;
+                config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                config.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(config =>
+            {
+                config.RequireHttpsMetadata = false;
+                config.SaveToken = true;
+                config.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)),
 
-                options.LoginPath = "/Error";
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience
+                };
             });
         }
 
         public static void CustomUseIdentity(this IApplicationBuilder app)
         {
-            app.UseCookiePolicy();
             app.UseAuthentication();
         }
     }

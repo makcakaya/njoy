@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace Njoy.Admin
 {
-    [Authorize]
     [ApiController, Route("api/[controller]")]
     public sealed class AdminUserController : ControllerBase
     {
@@ -18,14 +17,21 @@ namespace Njoy.Admin
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        [HttpPost]
+        [HttpPost, Route("create")]
+        public async Task<AdminUserRowModel> Create(CreateAdminUserFeature.Request request)
+        {
+            return await _mediator.Send(request);
+        }
+
+        [HttpPost, Route("update")]
         public async Task<AdminUserRowModel> Update(EditAdminUserFeature.Request request)
         {
             return await _mediator.Send(request);
         }
 
-        [HttpPost, Route("create")]
-        public async Task<AdminUserRowModel> Create(CreateAdminUserFeature.Request request)
+        [HttpPost, Route("login")]
+        [AllowAnonymous]
+        public async Task<string> Login(LoginAdminUserFeature.Request request)
         {
             return await _mediator.Send(request);
         }
