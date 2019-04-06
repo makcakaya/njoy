@@ -26,7 +26,9 @@ namespace Njoy.Admin
                     new Claim(ClaimTypes.Name, username)
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = _settings.Issuer,
+                Audience = _settings.Audience
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);

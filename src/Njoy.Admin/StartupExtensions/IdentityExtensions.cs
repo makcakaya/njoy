@@ -46,8 +46,12 @@ namespace Njoy.Admin
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
+
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience
                 };
             });
         }
