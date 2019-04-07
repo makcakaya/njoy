@@ -24,7 +24,7 @@ namespace Njoy.Admin.IntegrationTests
 
             var identityResult = await userManager.CreateAsync(user, password);
             Assert.True(identityResult.Succeeded);
-            Assert.NotEmpty(user.Id);
+            Assert.True(user.Id > 0);
 
             var request = new EditAdminUserFeature.Request
             {
@@ -57,7 +57,7 @@ namespace Njoy.Admin.IntegrationTests
 
             var identityResult = await userManager.CreateAsync(user, password);
             Assert.True(identityResult.Succeeded);
-            Assert.NotEmpty(user.Id);
+            Assert.True(user.Id > 0);
 
             var request = new EditAdminUserFeature.Request
             {
@@ -98,7 +98,7 @@ namespace Njoy.Admin.IntegrationTests
 
             var identityResult = await userManager.CreateAsync(user, password);
             Assert.True(identityResult.Succeeded);
-            Assert.NotEmpty(user.Id);
+            Assert.True(user.Id > 0);
 
             var request = new EditAdminUserFeature.Request
             {

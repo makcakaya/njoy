@@ -26,7 +26,7 @@ namespace Njoy.Admin.Features
                 var adminUsers = await _userManager.GetUsersInRoleAsync(AppRole.Sales);
                 if (!request.ListAllUsers)
                 {
-                    if (!string.IsNullOrEmpty(request.IdFilter))
+                    if (request.IdFilter > 0)
                     {
                         adminUsers = adminUsers.Where(us => us.Id == request.IdFilter).ToList();
                     }
@@ -56,10 +56,10 @@ namespace Njoy.Admin.Features
 
         public sealed class Request : IRequest<List<AdminUserRowModel>>
         {
-            public string IdFilter { get; set; }
+            public int IdFilter { get; set; }
             public string UsernameFilter { get; set; }
 
-            public bool ListAllUsers => string.IsNullOrEmpty(IdFilter) && string.IsNullOrEmpty(UsernameFilter);
+            public bool ListAllUsers => IdFilter==default(int) && string.IsNullOrEmpty(UsernameFilter);
         }
     }
 }

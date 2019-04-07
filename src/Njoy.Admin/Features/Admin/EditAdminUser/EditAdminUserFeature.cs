@@ -34,7 +34,7 @@ namespace Njoy.Admin.Features
 
                 using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
-                    var user = await _userManager.FindByIdAsync(request.Id);
+                    var user = await _userManager.FindByIdAsync(request.Id + "");
                     if (user is null)
                     {
                         throw new Exception($"{nameof(AppUser)} with Id of {request.Id} does not exist.");
@@ -87,8 +87,8 @@ namespace Njoy.Admin.Features
 
         public sealed class Request : IRequest<AdminUserRowModel>
         {
-            [Required, MinLength(1)]
-            public string Id { get; set; }
+            [Required]
+            public int Id { get; set; }
 
             public string FirstName { get; set; }
 

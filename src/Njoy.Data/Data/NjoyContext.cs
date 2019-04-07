@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Njoy.Data
 {
-    public sealed class NjoyContext : IdentityDbContext<AppUser, AppRole, string>
+    public sealed class NjoyContext : IdentityDbContext<AppUser, AppRole, int>
     {
         public NjoyContext()
         {
@@ -20,14 +20,14 @@ namespace Njoy.Data
 
             // Identity User
             builder.Entity<AppUser>().ToTable("AppUsers");
-            builder.Entity<IdentityUserClaim<string>>().ToTable("AppUserClaims");
-            builder.Entity<IdentityUserLogin<string>>().ToTable("AppUserLogins");
-            builder.Entity<IdentityUserToken<string>>().ToTable("AppUserTokens");
+            builder.Entity<IdentityUserClaim<int>>().ToTable("AppUserClaims");
+            builder.Entity<IdentityUserLogin<int>>().ToTable("AppUserLogins");
+            builder.Entity<IdentityUserToken<int>>().ToTable("AppUserTokens");
 
             // Identity Role
             builder.Entity<AppRole>().ToTable("AppRoles");
-            builder.Entity<IdentityUserRole<string>>().ToTable("AppUserRoles");
-            builder.Entity<IdentityRoleClaim<string>>().ToTable("AppRoleClaims");
+            builder.Entity<IdentityUserRole<int>>().ToTable("AppUserRoles");
+            builder.Entity<IdentityRoleClaim<int>>().ToTable("AppRoleClaims");
         }
     }
 }
