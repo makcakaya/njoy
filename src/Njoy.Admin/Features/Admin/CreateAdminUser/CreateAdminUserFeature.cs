@@ -46,7 +46,7 @@ namespace Njoy.Admin.Features
                         Email = request.Email,
                     };
 
-                    IdentityAssert.ThrowIfFailed(await _userManager.CreateAsync(user, request.NewPassword), "Create user");
+                    IdentityAssert.ThrowIfFailed(await _userManager.CreateAsync(user, request.Password), "Create user");
 
                     // Add claims; FirstName, LastName
                     AddClaim(user, ClaimTypes.GivenName, request.FirstName);
@@ -97,14 +97,14 @@ namespace Njoy.Admin.Features
             public string Email { get; set; }
 
             [MinLength(6)]
-            public string NewPassword { get; set; }
+            public string Password { get; set; }
 
             [MinLength(6)]
-            public string NewPasswordConfirm { get; set; }
+            public string PasswordConfirm { get; set; }
 
             public bool IsValid()
             {
-                return NewPassword == NewPasswordConfirm && NewPassword != null;
+                return Password == PasswordConfirm && Password != null;
             }
         }
     }

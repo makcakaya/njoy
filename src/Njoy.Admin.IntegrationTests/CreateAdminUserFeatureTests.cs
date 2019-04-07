@@ -20,8 +20,8 @@ namespace Njoy.Admin.IntegrationTests
             var request = new CreateAdminUserFeature.Request
             {
                 Username = "adminuser1",
-                NewPassword = "testP@ssword!1",
-                NewPasswordConfirm = "testP@ssword!1",
+                Password = "testP@ssword!1",
+                PasswordConfirm = "testP@ssword!1",
                 FirstName = "AdminName",
                 LastName = "AdminSurname",
                 Email = "admin@test.com"
@@ -43,8 +43,8 @@ namespace Njoy.Admin.IntegrationTests
             var request = new CreateAdminUserFeature.Request
             {
                 Username = "adminuser1",
-                NewPassword = "testP@ssword!1",
-                NewPasswordConfirm = "testP@ssword!1"
+                Password = "testP@ssword!1",
+                PasswordConfirm = "testP@ssword!1"
             };
 
             var handler = GetHandler(ServiceProviderHelper.CreateInstance<CreateAdminUserFeatureTests>());
