@@ -1,12 +1,12 @@
-﻿using System;
+﻿using MediatR;
+using Microsoft.AspNetCore.Identity;
+using Njoy.Data;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Njoy.Admin.Features
 {
@@ -14,16 +14,16 @@ namespace Njoy.Admin.Features
     {
         public sealed class Handler : IRequestHandler<Request, List<AdminUserRowModel>>
         {
-            private readonly UserManager<AdminUser> _userManager;
+            private readonly UserManager<AppUser> _userManager;
 
-            public Handler(UserManager<AdminUser> userManager)
+            public Handler(UserManager<AppUser> userManager)
             {
                 _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             }
 
             public async Task<List<AdminUserRowModel>> Handle(Request request, CancellationToken cancellationToken)
             {
-                var adminUsers = await _userManager.GetUsersInRoleAsync(AdminRole.Sales);
+                var adminUsers = await _userManager.GetUsersInRoleAsync(AppRole.Sales);
                 if (!request.ListAllUsers)
                 {
                     if (!string.IsNullOrEmpty(request.IdFilter))
@@ -61,5 +61,5 @@ namespace Njoy.Admin.Features
 
             public bool ListAllUsers => string.IsNullOrEmpty(IdFilter) && string.IsNullOrEmpty(UsernameFilter);
         }
-    } 
+    }
 }

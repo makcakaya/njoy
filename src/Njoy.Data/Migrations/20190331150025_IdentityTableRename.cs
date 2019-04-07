@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Njoy.Admin.Migrations
+namespace Njoy.Data.Migrations
 {
     public partial class IdentityTableRename : Migration
     {

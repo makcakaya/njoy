@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
+using Njoy.Data;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -14,11 +15,11 @@ namespace Njoy.Admin.Features
     {
         public sealed class Handler : IRequestHandler<Request, AdminUserRowModel>
         {
-            private readonly AdminContext _context;
-            private readonly UserManager<AdminUser> _userManager;
-            private readonly RoleManager<AdminRole> _roleManager;
+            private readonly NjoyContext _context;
+            private readonly UserManager<AppUser> _userManager;
+            private readonly RoleManager<AppRole> _roleManager;
 
-            public Handler(AdminContext context, UserManager<AdminUser> userManager, RoleManager<AdminRole> roleManager)
+            public Handler(NjoyContext context, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
             {
                 _context = context ?? throw new ArgumentNullException(nameof(context));
                 _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
@@ -36,10 +37,10 @@ namespace Njoy.Admin.Features
                 {
                     if (_userManager.Users.Any(u => u.UserName == request.Username))
                     {
-                        throw new Exception($"{nameof(AdminUser)} with {request.Username} already exist.");
+                        throw new Exception($"{nameof(AppUser)} with {request.Username} already exist.");
                     }
 
-                    var user = new AdminUser
+                    var user = new AppUser
                     {
                         UserName = request.Username,
                         Email = request.Email,
@@ -51,12 +52,12 @@ namespace Njoy.Admin.Features
                     AddClaim(user, ClaimTypes.GivenName, request.FirstName);
                     AddClaim(user, ClaimTypes.Surname, request.LastName);
 
-                    if (!await _roleManager.RoleExistsAsync(AdminRole.Sales))
+                    if (!await _roleManager.RoleExistsAsync(AppRole.Sales))
                     {
-                        IdentityAssert.ThrowIfFailed(await _roleManager.CreateAsync(new AdminRole { Name = AdminRole.Sales }), "Create Sales role");
+                        IdentityAssert.ThrowIfFailed(await _roleManager.CreateAsync(new AppRole { Name = AppRole.Sales }), "Create Sales role");
                     }
 
-                    IdentityAssert.ThrowIfFailed(await _userManager.AddToRoleAsync(user, AdminRole.Sales), "Add user to Sales role");
+                    IdentityAssert.ThrowIfFailed(await _userManager.AddToRoleAsync(user, AppRole.Sales), "Add user to Sales role");
                     transaction.Commit();
 
                     var claims = await _userManager.GetClaimsAsync(user);
@@ -71,7 +72,7 @@ namespace Njoy.Admin.Features
                 }
             }
 
-            private async void AddClaim(AdminUser user, string claimType, string value)
+            private async void AddClaim(AppUser user, string claimType, string value)
             {
                 if (!string.IsNullOrWhiteSpace(value))
                 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Njoy.Admin.Migrations
+namespace Njoy.Data.Migrations
 {
     public partial class AdminRoles : Migration
     {

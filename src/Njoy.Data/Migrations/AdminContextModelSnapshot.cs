@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Njoy.Admin;
+using Njoy.Data;
 
-namespace Njoy.Admin.Migrations
+namespace Njoy.Data.Migrations
 {
-    [DbContext(typeof(AdminContext))]
+    [DbContext(typeof(NjoyContext))]
     partial class AdminContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -36,7 +36,7 @@ namespace Njoy.Admin.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AdminRoleClaims");
+                    b.ToTable("AppRoleClaims");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -56,7 +56,7 @@ namespace Njoy.Admin.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AdminUserClaims");
+                    b.ToTable("AppUserClaims");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -74,7 +74,7 @@ namespace Njoy.Admin.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AdminUserLogins");
+                    b.ToTable("AppUserLogins");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -87,7 +87,7 @@ namespace Njoy.Admin.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AdminUserRoles");
+                    b.ToTable("AppUserRoles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -102,10 +102,10 @@ namespace Njoy.Admin.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AdminUserTokens");
+                    b.ToTable("AppUserTokens");
                 });
 
-            modelBuilder.Entity("Njoy.Admin.AdminRole", b =>
+            modelBuilder.Entity("Njoy.Data.AppRole", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -126,10 +126,10 @@ namespace Njoy.Admin.Migrations
                         .HasName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("AdminRoles");
+                    b.ToTable("AppRoles");
                 });
 
-            modelBuilder.Entity("Njoy.Admin.AdminUser", b =>
+            modelBuilder.Entity("Njoy.Data.AppUser", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -177,12 +177,12 @@ namespace Njoy.Admin.Migrations
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("AdminUsers");
+                    b.ToTable("AppUsers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("Njoy.Admin.AdminRole")
+                    b.HasOne("Njoy.Data.AppRole")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -190,7 +190,7 @@ namespace Njoy.Admin.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Njoy.Admin.AdminUser")
+                    b.HasOne("Njoy.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -198,7 +198,7 @@ namespace Njoy.Admin.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Njoy.Admin.AdminUser")
+                    b.HasOne("Njoy.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -206,12 +206,12 @@ namespace Njoy.Admin.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.HasOne("Njoy.Admin.AdminRole")
+                    b.HasOne("Njoy.Data.AppRole")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Njoy.Admin.AdminUser")
+                    b.HasOne("Njoy.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -219,7 +219,7 @@ namespace Njoy.Admin.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Njoy.Admin.AdminUser")
+                    b.HasOne("Njoy.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);

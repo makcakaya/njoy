@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Njoy.Admin.Features;
-using System;
+using Njoy.Data;
 using System.Collections.Generic;
 using System.Security.Claims;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -18,8 +17,8 @@ namespace Njoy.Admin.IntegrationTests
             const int userCount = 5; // number of users to create for test
 
             var serviceProvider = ServiceProviderHelper.CreateInstance<ListAdminUsersFeatureTests>();
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
-            var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
+            var roleManager = serviceProvider.Get<RoleManager<AppRole>>();
 
             var users = await CreateBulkUsers(userCount, userManager, roleManager);
 
@@ -49,8 +48,8 @@ namespace Njoy.Admin.IntegrationTests
             const int userCount = 2; // number of users to create for test
 
             var serviceProvider = ServiceProviderHelper.CreateInstance<ListAdminUsersFeatureTests>();
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
-            var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
+            var roleManager = serviceProvider.Get<RoleManager<AppRole>>();
 
             var users = await CreateBulkUsers(userCount, userManager, roleManager);
 
@@ -73,7 +72,7 @@ namespace Njoy.Admin.IntegrationTests
                 Assert.Equal(createdUser.Id, returnedUser.Id);
                 Assert.Equal(createdUser.UserName, returnedUser.Username);
                 Assert.Equal(createdUser.Email, returnedUser.Email);
-            }            
+            }
         }
 
         [Fact]
@@ -82,8 +81,8 @@ namespace Njoy.Admin.IntegrationTests
             const int userCount = 2; // number of users to create for test
 
             var serviceProvider = ServiceProviderHelper.CreateInstance<ListAdminUsersFeatureTests>();
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
-            var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
+            var roleManager = serviceProvider.Get<RoleManager<AppRole>>();
 
             var users = await CreateBulkUsers(userCount, userManager, roleManager);
 
@@ -109,13 +108,13 @@ namespace Njoy.Admin.IntegrationTests
             }
         }
 
-        private async Task<List<AdminUser>> CreateBulkUsers(int userCount, UserManager<AdminUser> userManager, RoleManager<AdminRole> roleManager)
+        private async Task<List<AppUser>> CreateBulkUsers(int userCount, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
         {
             // create some test users
-            var users = new List<AdminUser>();
+            var users = new List<AppUser>();
             for (int i = 0; i < userCount; i++)
             {
-                users.Add(new AdminUser
+                users.Add(new AppUser
                 {
                     Id = $"id{i}",
                     UserName = $"admin{i}",
@@ -123,9 +122,9 @@ namespace Njoy.Admin.IntegrationTests
                 });
             }
 
-            if (!await roleManager.RoleExistsAsync(AdminRole.Sales))
+            if (!await roleManager.RoleExistsAsync(AppRole.Sales))
             {
-                await roleManager.CreateAsync(new AdminRole { Name = AdminRole.Sales });
+                await roleManager.CreateAsync(new AppRole { Name = AppRole.Sales });
             }
             for (int i = 0; i < users.Count; i++)
             {
@@ -133,7 +132,7 @@ namespace Njoy.Admin.IntegrationTests
                 await userManager.CreateAsync(user, "Password_1234");
                 await userManager.AddClaimAsync(user, new Claim(ClaimTypes.GivenName, $"name{i}"));
                 await userManager.AddClaimAsync(user, new Claim(ClaimTypes.Surname, $"surname{i}"));
-                await userManager.AddToRoleAsync(user, AdminRole.Sales);
+                await userManager.AddToRoleAsync(user, AppRole.Sales);
             }
 
             return users;
