@@ -116,7 +116,6 @@ namespace Njoy.Admin.IntegrationTests
             {
                 users.Add(new AppUser
                 {
-                    Id = i,
                     UserName = $"admin{i}",
                     Email = $"email{i}"
                 });
