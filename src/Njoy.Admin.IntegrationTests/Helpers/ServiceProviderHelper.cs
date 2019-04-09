@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Njoy.Data;
 
 namespace Njoy.Admin.IntegrationTests
 {
@@ -19,11 +20,11 @@ namespace Njoy.Admin.IntegrationTests
         {
             var services = new ServiceCollection();
 
-            services.AddIdentity<AdminUser, AdminRole>()
-                         .AddEntityFrameworkStores<AdminContext>()
+            services.AddIdentity<AppUser, AppRole>()
+                         .AddEntityFrameworkStores<NjoyContext>()
                          .AddDefaultTokenProviders();
 
-            services.AddDbContext<AdminContext>(options =>
+            services.AddDbContext<NjoyContext>(options =>
             {
                 options.ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 var result = useSqlServer ? options.UseSqlServer(SqlConnectionString)

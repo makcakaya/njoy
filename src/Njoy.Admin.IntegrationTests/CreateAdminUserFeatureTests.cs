@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Njoy.Admin.Features;
+using Njoy.Data;
 using System;
 using System.Linq;
 using System.Threading;
@@ -13,14 +14,14 @@ namespace Njoy.Admin.IntegrationTests
         public async void Can_Create_Admin_User()
         {
             var serviceProvider = ServiceProviderHelper.CreateInstance<CreateAdminUserFeature>();
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
             var handler = GetHandler(serviceProvider);
 
             var request = new CreateAdminUserFeature.Request
             {
                 Username = "adminuser1",
-                NewPassword = "testP@ssword!1",
-                NewPasswordConfirm = "testP@ssword!1",
+                Password = "testP@ssword!1",
+                PasswordConfirm = "testP@ssword!1",
                 FirstName = "AdminName",
                 LastName = "AdminSurname",
                 Email = "admin@test.com"
@@ -33,7 +34,7 @@ namespace Njoy.Admin.IntegrationTests
             Assert.Equal(user.Id, createdUser.Id);
 
             var roles = await userManager.GetRolesAsync(user);
-            Assert.Contains(AdminRole.Sales, roles);
+            Assert.Contains(AppRole.Sales, roles);
         }
 
         [Fact]
@@ -42,8 +43,8 @@ namespace Njoy.Admin.IntegrationTests
             var request = new CreateAdminUserFeature.Request
             {
                 Username = "adminuser1",
-                NewPassword = "testP@ssword!1",
-                NewPasswordConfirm = "testP@ssword!1"
+                Password = "testP@ssword!1",
+                PasswordConfirm = "testP@ssword!1"
             };
 
             var handler = GetHandler(ServiceProviderHelper.CreateInstance<CreateAdminUserFeatureTests>());
@@ -55,9 +56,9 @@ namespace Njoy.Admin.IntegrationTests
 
         private CreateAdminUserFeature.Handler GetHandler(ServiceProviderHelper serviceProvider)
         {
-            var context = serviceProvider.Get<AdminContext>();
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
-            var roleManager = serviceProvider.Get<RoleManager<AdminRole>>();
+            var context = serviceProvider.Get<NjoyContext>();
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
+            var roleManager = serviceProvider.Get<RoleManager<AppRole>>();
             return new CreateAdminUserFeature.Handler(context, userManager, roleManager);
         }
     }

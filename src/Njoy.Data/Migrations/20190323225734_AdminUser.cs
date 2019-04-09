@@ -1,7 +1,7 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
-namespace Njoy.Admin.Migrations
+namespace Njoy.Data.Migrations
 {
     public partial class AdminUser : Migration
     {

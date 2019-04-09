@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
+using Njoy.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,10 +16,10 @@ namespace Njoy.Admin.Features
     {
         public sealed class Handler : IRequestHandler<Request, AdminUserRowModel>
         {
-            private readonly AdminContext _context;
-            private readonly UserManager<AdminUser> _userManager;
+            private readonly NjoyContext _context;
+            private readonly UserManager<AppUser> _userManager;
 
-            public Handler(AdminContext context, UserManager<AdminUser> userManager)
+            public Handler(NjoyContext context, UserManager<AppUser> userManager)
             {
                 _context = context ?? throw new ArgumentNullException(nameof(context));
                 _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
@@ -33,10 +34,10 @@ namespace Njoy.Admin.Features
 
                 using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
-                    var user = await _userManager.FindByIdAsync(request.Id);
+                    var user = await _userManager.FindByIdAsync(request.Id + "");
                     if (user is null)
                     {
-                        throw new Exception($"{nameof(AdminUser)} with Id of {request.Id} does not exist.");
+                        throw new Exception($"{nameof(AppUser)} with Id of {request.Id} does not exist.");
                     }
 
                     // Update claims; FirstName, LastName
@@ -65,7 +66,7 @@ namespace Njoy.Admin.Features
                 }
             }
 
-            private async void UpdateClaim(AdminUser user, IEnumerable<Claim> claims, string claimType, string value)
+            private async void UpdateClaim(AppUser user, IEnumerable<Claim> claims, string claimType, string value)
             {
                 if (!string.IsNullOrWhiteSpace(value))
                 {
@@ -86,8 +87,8 @@ namespace Njoy.Admin.Features
 
         public sealed class Request : IRequest<AdminUserRowModel>
         {
-            [Required, MinLength(1)]
-            public string Id { get; set; }
+            [Required]
+            public int Id { get; set; }
 
             public string FirstName { get; set; }
 

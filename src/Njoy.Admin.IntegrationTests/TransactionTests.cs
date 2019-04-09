@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Njoy.Data;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace Njoy.Admin.IntegrationTests
 
         private void CleanUsersTable()
         {
-            var context = ServiceProviderHelper.CreateInstance<TransactionTests>(useSqlServer: true).Get<AdminContext>();
+            var context = ServiceProviderHelper.CreateInstance<TransactionTests>(useSqlServer: true).Get<NjoyContext>();
             context.Users.RemoveRange(context.Users.ToArray());
             context.SaveChanges();
         }
@@ -32,7 +33,7 @@ namespace Njoy.Admin.IntegrationTests
             const string username = "testuser123";
             await CreateUser(serviceProvider, username, true);
 
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
 
             Assert.Empty(userManager.Users);
         }
@@ -45,7 +46,7 @@ namespace Njoy.Admin.IntegrationTests
             const string username = "testuser1234";
             await CreateUser(serviceProvider, username, false);
 
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
             var user = userManager.Users.FirstOrDefault(u => u.UserName == username);
 
             Assert.NotNull(user);
@@ -53,9 +54,9 @@ namespace Njoy.Admin.IntegrationTests
 
         private async Task CreateUser(ServiceProviderHelper serviceProvider, string username, bool shouldFail)
         {
-            var user = new AdminUser { UserName = username };
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
-            var context = serviceProvider.Get<AdminContext>();
+            var user = new AppUser { UserName = username };
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
+            var context = serviceProvider.Get<NjoyContext>();
 
             using (var transaction = context.Database.BeginTransaction())
             {

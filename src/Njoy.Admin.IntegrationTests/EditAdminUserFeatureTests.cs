@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Njoy.Admin.Features;
+using Njoy.Data;
 using System;
 using System.Threading;
 using Xunit;
@@ -12,9 +13,9 @@ namespace Njoy.Admin.IntegrationTests
         public async void Can_Add_Claims()
         {
             var serviceProvider = ServiceProviderHelper.CreateInstance<EditAdminUserFeatureTests>();
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
 
-            var user = new AdminUser
+            var user = new AppUser
             {
                 UserName = "TestUser",
                 Email = "testuser@test.com"
@@ -23,7 +24,7 @@ namespace Njoy.Admin.IntegrationTests
 
             var identityResult = await userManager.CreateAsync(user, password);
             Assert.True(identityResult.Succeeded);
-            Assert.NotEmpty(user.Id);
+            Assert.True(user.Id > 0);
 
             var request = new EditAdminUserFeature.Request
             {
@@ -44,9 +45,9 @@ namespace Njoy.Admin.IntegrationTests
         public async void Can_Change_Password()
         {
             var serviceProvider = ServiceProviderHelper.CreateInstance<EditAdminUserFeatureTests>();
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
 
-            var user = new AdminUser
+            var user = new AppUser
             {
                 UserName = "TestUser",
                 Email = "testuser@test.com"
@@ -56,7 +57,7 @@ namespace Njoy.Admin.IntegrationTests
 
             var identityResult = await userManager.CreateAsync(user, password);
             Assert.True(identityResult.Succeeded);
-            Assert.NotEmpty(user.Id);
+            Assert.True(user.Id > 0);
 
             var request = new EditAdminUserFeature.Request
             {
@@ -85,9 +86,9 @@ namespace Njoy.Admin.IntegrationTests
         public async void Change_Password_Throws_If_Current_Password_Not_Provided()
         {
             var serviceProvider = ServiceProviderHelper.CreateInstance<EditAdminUserFeature>();
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
 
-            var user = new AdminUser
+            var user = new AppUser
             {
                 UserName = "TestUser",
                 Email = "testuser@test.com"
@@ -97,7 +98,7 @@ namespace Njoy.Admin.IntegrationTests
 
             var identityResult = await userManager.CreateAsync(user, password);
             Assert.True(identityResult.Succeeded);
-            Assert.NotEmpty(user.Id);
+            Assert.True(user.Id > 0);
 
             var request = new EditAdminUserFeature.Request
             {
@@ -114,8 +115,8 @@ namespace Njoy.Admin.IntegrationTests
 
         private EditAdminUserFeature.Handler GetHandler(ServiceProviderHelper serviceProvider)
         {
-            var context = serviceProvider.Get<AdminContext>();
-            var userManager = serviceProvider.Get<UserManager<AdminUser>>();
+            var context = serviceProvider.Get<NjoyContext>();
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
             return new EditAdminUserFeature.Handler(context, userManager);
         }
     }
