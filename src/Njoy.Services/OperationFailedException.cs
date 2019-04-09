@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Njoy.Admin
+namespace Njoy.Services
 {
     [Serializable]
     public class OperationFailedException : Exception

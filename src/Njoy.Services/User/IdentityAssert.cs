@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 
-namespace Njoy.Admin.Features
+namespace Njoy.Services
 {
     public static class IdentityAssert
     {

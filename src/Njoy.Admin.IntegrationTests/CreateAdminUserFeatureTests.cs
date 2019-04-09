@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Njoy.Admin.Features;
 using Njoy.Data;
+using Njoy.Services;
 using System;
 using System.Linq;
 using System.Threading;
@@ -44,14 +45,17 @@ namespace Njoy.Admin.IntegrationTests
             {
                 Username = "adminuser1",
                 Password = "testP@ssword!1",
-                PasswordConfirm = "testP@ssword!1"
+                PasswordConfirm = "testP@ssword!1",
+                FirstName = "AdminName",
+                LastName = "AdminSurname",
+                Email = "admin@test.com"
             };
 
             var handler = GetHandler(ServiceProviderHelper.CreateInstance<CreateAdminUserFeatureTests>());
 
             await handler.Handle(request, new CancellationToken());
 
-            await Assert.ThrowsAsync<Exception>(async () => await handler.Handle(request, new CancellationToken()));
+            await Assert.ThrowsAsync<OperationFailedException>(async () => await handler.Handle(request, new CancellationToken()));
         }
 
         private CreateAdminUserFeature.Handler GetHandler(ServiceProviderHelper serviceProvider)
@@ -59,7 +63,8 @@ namespace Njoy.Admin.IntegrationTests
             var context = serviceProvider.Get<NjoyContext>();
             var userManager = serviceProvider.Get<UserManager<AppUser>>();
             var roleManager = serviceProvider.Get<RoleManager<AppRole>>();
-            return new CreateAdminUserFeature.Handler(context, userManager, roleManager);
+            
+            return new CreateAdminUserFeature.Handler(new UserService(context, userManager, roleManager));
         }
     }
 }
