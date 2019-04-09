@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Newtonsoft.Json;
+using Njoy.Data;
 using Njoy.Services;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -26,9 +27,11 @@ namespace Njoy.Admin.Features
                     throw new ArgumentException("Request is not valid.");
                 }
 
-                //TODO: Map request to CreateUserParam
-                //_userService.Create();
-                throw new NotImplementedException();
+                var response = await _userService.Create(request.GetServiceRequest());
+                return new AdminUserRowModel
+                {
+                    Id = response.Id
+                };
             }
         }
 
@@ -55,6 +58,20 @@ namespace Njoy.Admin.Features
             public bool IsValid()
             {
                 return Password == PasswordConfirm && Password != null;
+            }
+
+            public CreateUserRequest GetServiceRequest()
+            {
+                return new CreateUserRequest
+                {
+                    FirstName = this.Username,
+                    LastName = this.LastName,
+                    Username = this.Username,
+                    Email = this.Email,
+                    Password = this.Password,
+                    PasswordConfirm = this.PasswordConfirm,
+                    Role = AppRole.Sales
+                };
             }
         }
     }
