@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Njoy.Services;
 using SimpleInjector;
 using SimpleInjector.Integration.AspNetCore.Mvc;
 using SimpleInjector.Lifestyles;
@@ -41,6 +42,7 @@ namespace Njoy.Admin
 
             // Register custom dependencies (services etc)
             container.Register<IJwtService, JwtService>();
+            container.Register<IUserService, UserService>();
 
             var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
             container.RegisterInstance(jwtSettings);
