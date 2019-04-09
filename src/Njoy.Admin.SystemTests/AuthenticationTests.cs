@@ -6,7 +6,9 @@ using Njoy.Admin.Features;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Reflection;
+using System.Text;
 using Xunit;
 
 namespace Njoy.Admin.SystemTests
@@ -57,7 +59,8 @@ namespace Njoy.Admin.SystemTests
             };
 
             var response = await _client.PostAsync("api/adminuser/login",
-                new StringContent(JsonConvert.SerializeObject(request)));
+                new StringContent(JsonConvert.SerializeObject(request), 
+                Encoding.UTF8, MediaTypeNames.Application.Json));
             Assert.NotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
     }
