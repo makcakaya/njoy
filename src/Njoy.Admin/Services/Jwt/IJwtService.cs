@@ -1,7 +1,9 @@
-﻿namespace Njoy.Admin
+﻿using System.Threading.Tasks;
+
+namespace Njoy.Admin
 {
     public interface IJwtService
     {
-        string GenerateToken(string username, string password);
+        Task<string> GenerateToken(string username, string password);
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface IUserService
     {
-        void Create()
+        void Create();
     }
 }
