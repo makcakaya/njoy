@@ -137,5 +137,26 @@ namespace Njoy.Services
                 }
             }
         }
+
+        public async Task<GetUsersResponse> Get(GetUsersRequest request)
+        {
+            request = request ?? throw new ArgumentNullException(nameof(request));
+
+            var result = new List<AppUser>();
+            foreach (var role in request.Roles)
+            {
+                result.AddRange(await _userManager.GetUsersInRoleAsync(role));
+            }
+
+            return new GetUsersResponse
+            {
+                Users = result.Select(u => new GetUsersResponse.Record
+                {
+                    Id = u.Id,
+                    Username = u.UserName,
+                    Email = u.Email
+                })
+            };
+        }
     }
 }

@@ -11,5 +11,7 @@ namespace Njoy.Services
         Task<bool> DoesAdminRootExist();
 
         Task Edit(EditUserRequest request);
+
+        Task<GetUsersResponse> Get(GetUsersRequest request);
     }
 }

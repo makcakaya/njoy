@@ -1,10 +1,8 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
-using Njoy.Data;
+using Njoy.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,54 +10,53 @@ namespace Njoy.Admin.Features
 {
     public sealed class ListAdminUsersFeature
     {
-        public sealed class Handler : IRequestHandler<Request, List<AdminUserRowModel>>
+        public sealed class Handler : IRequestHandler<Request, Response>
         {
-            private readonly UserManager<AppUser> _userManager;
+            private readonly IUserService _userService;
 
-            public Handler(UserManager<AppUser> userManager)
+            public Handler(IUserService userService)
             {
-                _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+                _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             }
 
-            public async Task<List<AdminUserRowModel>> Handle(Request request, CancellationToken cancellationToken)
+            public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
             {
-                var adminUsers = await _userManager.GetUsersInRoleAsync(AppRole.Sales);
-                if (!request.ListAllUsers)
-                {
-                    if (!string.IsNullOrEmpty(request.IdFilter))
-                    {
-                        adminUsers = adminUsers.Where(us => us.Id == request.IdFilter).ToList();
-                    }
-                    else if (!string.IsNullOrEmpty(request.UsernameFilter))
-                    {
-                        adminUsers = adminUsers.Where(us => us.UserName == request.UsernameFilter).ToList();
-                    }
-                }
+                request = request ?? throw new ArgumentNullException(nameof(request));
 
-                var listAdminUsers = new List<AdminUserRowModel>();
-                foreach (var user in adminUsers)
-                {
-                    var claims = await _userManager.GetClaimsAsync(user);
-                    listAdminUsers.Add(new AdminUserRowModel()
-                    {
-                        Id = user.Id,
-                        Email = user.Email,
-                        Username = user.UserName,
-                        FirstName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
-                        LastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value
-                    });
-                }
+                var result = await _userService.Get(request.Map());
 
-                return listAdminUsers;
+                return new Response
+                {
+                    Users = result.Users.Select(u => new Response.Record
+                    {
+                        Id = u.Id,
+                        Username = u.Username,
+                        Email = u.Email
+                    })
+                };
             }
         }
 
-        public sealed class Request : IRequest<List<AdminUserRowModel>>
+        public sealed class Request : IRequest<Response>, IMapper<GetUsersRequest>
         {
-            public string IdFilter { get; set; }
-            public string UsernameFilter { get; set; }
+            public IEnumerable<string> Roles { get; set; }
 
-            public bool ListAllUsers => string.IsNullOrEmpty(IdFilter) && string.IsNullOrEmpty(UsernameFilter);
+            public GetUsersRequest Map()
+            {
+                return new GetUsersRequest { Roles = Roles };
+            }
+        }
+
+        public sealed class Response
+        {
+            public IEnumerable<Record> Users { get; set; }
+
+            public sealed class Record
+            {
+                public string Id { get; set; }
+                public string Username { get; set; }
+                public string Email { get; set; }
+            }
         }
     }
 }
