@@ -18,7 +18,8 @@ namespace Njoy.Admin.IntegrationTests
 
         private void CleanUsersTable()
         {
-            var context = ServiceProviderHelper.CreateInstance<TransactionTests>(useSqlServer: true).Get<NjoyContext>();
+            var context = ServiceProviderHelper.CreateInstance<TransactionTests>(useSqlServer: true)
+                .Get<NjoyContext>();
             context.Users.RemoveRange(context.Users.ToArray());
             context.SaveChanges();
         }

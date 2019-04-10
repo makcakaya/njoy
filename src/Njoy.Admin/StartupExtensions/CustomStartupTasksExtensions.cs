@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Configuration;
 using Njoy.Admin.Features;
+using Njoy.Services;
 using System;
 using System.Threading;
 
@@ -10,25 +11,10 @@ namespace Njoy.Admin
     {
         public static void CreateRootAccount(this IConfiguration config, IMediator mediator)
         {
-            const string SectionName = "RootUser";
-            const string UsernameKey = "username";
-            const string PasswordKey = "password";
-
             var blocker = new ManualResetEvent(false);
 
-            var section = config.GetSection(SectionName);
-            if (section is null) { return; }
-
-            var request = new CreateRootUserFeature.Request
-            {
-                Username = section[UsernameKey],
-                Password = section[PasswordKey]
-            };
-
-            if (request.Username is null || request.Password is null) { return; }
-
             Exception exception = null;
-            mediator.Send(request)
+            mediator.Send(new CreateAdminRootUserFeature.Request())
                 .ContinueWith((t) =>
                 {
                     if (t.IsFaulted)
@@ -42,7 +28,7 @@ namespace Njoy.Admin
 
             if (exception != null)
             {
-                throw new Exception($"{nameof(CreateRootAccount)} failed.", exception);
+                throw new OperationFailedException(nameof(CreateAdminRootUserFeature), exception);
             }
         }
     }

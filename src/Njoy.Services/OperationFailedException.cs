@@ -22,6 +22,11 @@ namespace Njoy.Services
         {
         }
 
+        public OperationFailedException(string operation, Exception inner) :
+            base(BuildOperationString(operation), inner)
+        {
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static string BuildOperationString(string operation)
         {

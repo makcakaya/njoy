@@ -45,6 +45,8 @@ namespace Njoy.Admin.IntegrationTests
                 options.User.RequireUniqueEmail = false;
             });
 
+            services.AddScoped<IUserService, UserService>();
+
             var helper = new ServiceProviderHelper(services.BuildServiceProvider());
 
             var blocker = new ManualResetEvent(false);

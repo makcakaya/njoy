@@ -29,7 +29,7 @@ namespace Njoy.Services
 
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                if (_userManager.Users.Any(u => u.UserName == param.Username))
+                if (DoesUserNameExist(param.Username))
                 {
                     throw new OperationFailedException(
                         $"{nameof(AppUser)} with username {param.Username} already exist.");
@@ -45,8 +45,8 @@ namespace Njoy.Services
                     await _userManager.CreateAsync(user, param.Password),
                     nameof(_userManager.CreateAsync));
 
-                AddClaim(user, ClaimTypes.GivenName, param.FirstName);
-                AddClaim(user, ClaimTypes.Surname, param.LastName);
+                await AddClaim(user, ClaimTypes.GivenName, param.FirstName);
+                await AddClaim(user, ClaimTypes.Surname, param.LastName);
 
                 // TODO: Create predefined roles on startup
                 //if (!await _roleManager.RoleExistsAsync(AppRole.Sales))
@@ -64,13 +64,26 @@ namespace Njoy.Services
             }
         }
 
-        private async void AddClaim(AppUser user, string claimType, string value)
+        public bool DoesUserNameExist(string username)
+        {
+            username = username ?? throw new ArgumentNullException(nameof(username));
+
+            return _userManager.Users.Any(u => u.UserName == username);
+        }
+
+        public async Task<bool> DoesAdminRootExist()
+        {
+            return (await _userManager.GetUsersInRoleAsync(AppRole.AdminRoot)).Count() > 0;
+        }
+
+        private async Task AddClaim(AppUser user, string claimType, string value)
         {
             if (!string.IsNullOrWhiteSpace(value))
             {
                 var result = await _userManager.AddClaimAsync(user, new Claim(claimType, value));
                 IdentityAssert.ThrowIfFailed(result, $"Adding claim {claimType}");
             }
+            return;
         }
     }
 }
