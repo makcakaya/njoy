@@ -27,7 +27,7 @@ namespace Njoy.Admin.Features
                     throw new ArgumentException("Request is not valid.");
                 }
 
-                var response = await _userService.Create(request.GetServiceRequest());
+                var response = await _userService.Create(request.Map());
                 return new AdminUserRowModel
                 {
                     Id = response.Id
@@ -35,7 +35,7 @@ namespace Njoy.Admin.Features
             }
         }
 
-        public sealed class Request : IRequest<AdminUserRowModel>
+        public sealed class Request : IRequest<AdminUserRowModel>, IMapper<CreateUserRequest>
         {
             public string Id { get; set; }
 
@@ -60,16 +60,16 @@ namespace Njoy.Admin.Features
                 return Password == PasswordConfirm && Password != null;
             }
 
-            public CreateUserRequest GetServiceRequest()
+            public CreateUserRequest Map()
             {
                 return new CreateUserRequest
                 {
-                    FirstName = this.Username,
-                    LastName = this.LastName,
-                    Username = this.Username,
-                    Email = this.Email,
-                    Password = this.Password,
-                    PasswordConfirm = this.PasswordConfirm,
+                    Username = Username,
+                    Email = Email,
+                    Password = Password,
+                    PasswordConfirm = PasswordConfirm,
+                    FirstName = FirstName,
+                    LastName = LastName,
                     Role = AppRole.Sales
                 };
             }
