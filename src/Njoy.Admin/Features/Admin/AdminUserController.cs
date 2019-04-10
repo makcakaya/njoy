@@ -25,9 +25,9 @@ namespace Njoy.Admin
         }
 
         [HttpPost, Route("update")]
-        public async Task<AdminUserRowModel> Update(EditAdminUserFeature.Request request)
+        public async Task Update(EditAdminUserFeature.Request request)
         {
-            return await _mediator.Send(request);
+            await _mediator.Send(request);
         }
 
         [HttpGet, Route("list")]

@@ -1,12 +1,9 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
-using Njoy.Data;
 using Njoy.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,88 +12,38 @@ namespace Njoy.Admin.Features
 {
     public sealed class EditAdminUserFeature
     {
-        public sealed class Handler : IRequestHandler<Request, AdminUserRowModel>
+        public sealed class Handler : IRequestHandler<Request>
         {
-            private readonly NjoyContext _context;
-            private readonly UserManager<AppUser> _userManager;
+            private readonly IUserService _userService;
 
-            public Handler(NjoyContext context, UserManager<AppUser> userManager)
+            public Handler(IUserService userService)
             {
-                _context = context ?? throw new ArgumentNullException(nameof(context));
-                _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+                _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             }
 
-            public async Task<AdminUserRowModel> Handle(Request request, CancellationToken cancellationToken)
+            public async Task<Unit> Handle(Request request, CancellationToken cancellationToken)
             {
                 if (!request.IsValid())
                 {
                     throw new ArgumentException("Request is not valid.");
                 }
 
-                using (var transaction = await _context.Database.BeginTransactionAsync())
-                {
-                    var user = await _userManager.FindByIdAsync(request.Id);
-                    if (user is null)
-                    {
-                        throw new Exception($"{nameof(AppUser)} with Id of {request.Id} does not exist.");
-                    }
-
-                    // Update claims; FirstName, LastName
-                    var claims = await _userManager.GetClaimsAsync(user);
-                    UpdateClaim(user, claims, ClaimTypes.GivenName, request.FirstName);
-                    UpdateClaim(user, claims, ClaimTypes.Surname, request.LastName);
-
-                    if (!string.IsNullOrEmpty(request.NewPassword))
-                    {
-                        // Update password
-                        var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-                        IdentityAssert.ThrowIfFailed(result, "Updating password");
-                    }
-
-                    transaction.Commit();
-
-                    claims = await _userManager.GetClaimsAsync(user);
-                    return new AdminUserRowModel
-                    {
-                        Id = user.Id,
-                        Username = user.UserName,
-                        FirstName = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName)?.Value,
-                        LastName = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname)?.Value,
-                        Email = user.Email
-                    };
-                }
-            }
-
-            private async void UpdateClaim(AppUser user, IEnumerable<Claim> claims, string claimType, string value)
-            {
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    var claim = claims.FirstOrDefault(c => c.Type == claimType);
-                    if (claim != null)
-                    {
-                        var result = await _userManager.ReplaceClaimAsync(user, claim, new Claim(claimType, value));
-                        IdentityAssert.ThrowIfFailed(result, $"Updating claim {claimType}");
-                    }
-                    else
-                    {
-                        var result = await _userManager.AddClaimAsync(user, new Claim(claimType, value));
-                        IdentityAssert.ThrowIfFailed(result, $"Updating claim {claimType}");
-                    }
-                }
+                await _userService.Edit(request.Map());
+                return Unit.Value;
             }
         }
 
-        public sealed class Request : IRequest<AdminUserRowModel>
+        public sealed class Request : IRequest<Unit>, IMapper<EditUserRequest>
         {
             [Required, MinLength(1)]
             public string Id { get; set; }
 
+            [EmailAddress]
+            public string Email { get; set; }
+
             public string FirstName { get; set; }
 
             public string LastName { get; set; }
-
-            [EmailAddress]
-            public string Email { get; set; }
 
             [MinLength(6)]
             public string CurrentPassword { get; set; }
@@ -111,6 +58,29 @@ namespace Njoy.Admin.Features
             {
                 return NewPassword == NewPasswordConfirm
                     && (NewPassword != null ? CurrentPassword != null : true);
+            }
+
+            public EditUserRequest Map()
+            {
+                var claims = new Dictionary<string, string>();
+                if (FirstName != null)
+                {
+                    claims.Add(ClaimTypes.GivenName, FirstName);
+                }
+                if (LastName != null)
+                {
+                    claims.Add(ClaimTypes.Surname, LastName);
+                }
+
+                return new EditUserRequest
+                {
+                    Id = Id,
+                    Email = Email,
+                    Claims = claims,
+                    CurrentPassword = CurrentPassword,
+                    NewPassword = NewPassword,
+                    NewPasswordConfirm = NewPasswordConfirm
+                };
             }
         }
     }

@@ -2,7 +2,6 @@
 using Njoy.Admin.Features;
 using Njoy.Data;
 using Njoy.Services;
-using System;
 using System.Linq;
 using System.Threading;
 using Xunit;
@@ -25,7 +24,8 @@ namespace Njoy.Admin.IntegrationTests
                 PasswordConfirm = "testP@ssword!1",
                 FirstName = "AdminName",
                 LastName = "AdminSurname",
-                Email = "admin@test.com"
+                Email = "admin@test.com",
+                Role = AppRole.AdminStandart
             };
 
             var createdUser = await handler.Handle(request, new CancellationToken());
@@ -35,7 +35,7 @@ namespace Njoy.Admin.IntegrationTests
             Assert.Equal(user.Id, createdUser.Id);
 
             var roles = await userManager.GetRolesAsync(user);
-            Assert.Contains(AppRole.Sales, roles);
+            Assert.Contains(request.Role, roles);
         }
 
         [Fact]
@@ -48,7 +48,8 @@ namespace Njoy.Admin.IntegrationTests
                 PasswordConfirm = "testP@ssword!1",
                 FirstName = "AdminName",
                 LastName = "AdminSurname",
-                Email = "admin@test.com"
+                Email = "admin@test.com",
+                Role = AppRole.AdminStandart
             };
 
             var handler = GetHandler(ServiceProviderHelper.CreateInstance<CreateAdminUserFeatureTests>());
@@ -63,7 +64,7 @@ namespace Njoy.Admin.IntegrationTests
             var context = serviceProvider.Get<NjoyContext>();
             var userManager = serviceProvider.Get<UserManager<AppUser>>();
             var roleManager = serviceProvider.Get<RoleManager<AppRole>>();
-            
+
             return new CreateAdminUserFeature.Handler(new UserService(context, userManager, roleManager));
         }
     }

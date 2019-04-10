@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Newtonsoft.Json;
-using Njoy.Data;
 using Njoy.Services;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -55,9 +54,12 @@ namespace Njoy.Admin.Features
             [MinLength(6)]
             public string PasswordConfirm { get; set; }
 
+            [Required]
+            public string Role { get; set; }
+
             public bool IsValid()
             {
-                return Password == PasswordConfirm && Password != null;
+                return Password != null && Password == PasswordConfirm;
             }
 
             public CreateUserRequest Map()
@@ -70,7 +72,7 @@ namespace Njoy.Admin.Features
                     PasswordConfirm = PasswordConfirm,
                     FirstName = FirstName,
                     LastName = LastName,
-                    Role = AppRole.Sales
+                    Role = Role
                 };
             }
         }

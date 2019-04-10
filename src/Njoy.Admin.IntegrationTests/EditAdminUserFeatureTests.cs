@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Njoy.Admin.Features;
 using Njoy.Data;
+using Njoy.Services;
 using System;
+using System.Security.Claims;
 using System.Threading;
 using Xunit;
 
@@ -34,11 +36,14 @@ namespace Njoy.Admin.IntegrationTests
             };
 
             var handler = GetHandler(serviceProvider);
-            var result = await handler.Handle(request, new CancellationToken());
+            await handler.Handle(request, new CancellationToken());
 
-            Assert.NotNull(result);
-            Assert.Equal(request.FirstName, result.FirstName);
-            Assert.Equal(request.LastName, result.LastName);
+            user = await userManager.FindByIdAsync(request.Id);
+            Assert.NotNull(user);
+
+            var claims = await userManager.GetClaimsAsync(user);
+            Assert.Contains(claims, c => c.Type == ClaimTypes.GivenName && c.Value == request.FirstName);
+            Assert.Contains(claims, c => c.Type == ClaimTypes.Surname && c.Value == request.LastName);
         }
 
         [Fact]
@@ -70,8 +75,7 @@ namespace Njoy.Admin.IntegrationTests
             };
 
             var handler = GetHandler(serviceProvider);
-            var result = await handler.Handle(request, new CancellationToken());
-            Assert.NotNull(result);
+            await handler.Handle(request, new CancellationToken());
 
             // To make sure that we changed the password, try to change it again.
             // If it succeeds, it means that previous operation was also successful.
@@ -79,7 +83,7 @@ namespace Njoy.Admin.IntegrationTests
             request.NewPassword = "ChangePassAgain@123";
             request.NewPasswordConfirm = "ChangePassAgain@123";
 
-            result = await handler.Handle(request, new CancellationToken());
+            await handler.Handle(request, new CancellationToken());
         }
 
         [Fact]
@@ -115,9 +119,9 @@ namespace Njoy.Admin.IntegrationTests
 
         private EditAdminUserFeature.Handler GetHandler(ServiceProviderHelper serviceProvider)
         {
-            var context = serviceProvider.Get<NjoyContext>();
-            var userManager = serviceProvider.Get<UserManager<AppUser>>();
-            return new EditAdminUserFeature.Handler(context, userManager);
+            var userService = serviceProvider.Get<IUserService>();
+
+            return new EditAdminUserFeature.Handler(userService);
         }
     }
 }
