@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Njoy.Admin.Features;
+using Njoy.Data;
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -59,9 +61,25 @@ namespace Njoy.Admin.SystemTests
             };
 
             var response = await _client.PostAsync("api/adminuser/login",
-                new StringContent(JsonConvert.SerializeObject(request), 
+                new StringContent(JsonConvert.SerializeObject(request),
                 Encoding.UTF8, MediaTypeNames.Application.Json));
             Assert.NotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(AppRole.AdminStandart)]
+        public async void No_Attribute_Actions_Return_Unauthorized_If_Not_In_Role(string role)
+        {
+            const string username = "Testuser";
+            const string password = "Testp@ssword!123";
+            // Register a new user if not exists that does not have the role
+
+            // Login to get the token
+
+            // Call a restricted action and check the response
+
+            // TODO: Will be implemented when Service layer task is merged.
+            throw new NotImplementedException();
         }
     }
 }

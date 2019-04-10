@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using Njoy.Data;
 
 namespace Njoy.Admin
 {
@@ -13,6 +14,7 @@ namespace Njoy.Admin
             {
                 var policy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
+                    .RequireRole(AppRole.AdminStandart)
                     .Build();
 
                 config.Filters.Add(new AuthorizeFilter(policy));

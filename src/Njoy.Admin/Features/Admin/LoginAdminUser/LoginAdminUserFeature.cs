@@ -21,8 +21,7 @@ namespace Njoy.Admin.Features
             {
                 request = request ?? throw new ArgumentNullException(nameof(request));
 
-                var token = _jwtService.GenerateToken(request.Username, request.Password);
-                return token;
+                return await _jwtService.GenerateToken(request.Username, request.Password);
             }
         }
 
