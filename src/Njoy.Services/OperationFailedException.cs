@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Njoy.Admin
+namespace Njoy.Services
 {
     [Serializable]
     public class OperationFailedException : Exception
@@ -19,6 +19,11 @@ namespace Njoy.Admin
 
         public OperationFailedException(string operation, params object[] args)
             : base($"{BuildOperationString(operation)} {JsonConvert.SerializeObject(args)}")
+        {
+        }
+
+        public OperationFailedException(string operation, Exception inner) :
+            base(BuildOperationString(operation), inner)
         {
         }
 

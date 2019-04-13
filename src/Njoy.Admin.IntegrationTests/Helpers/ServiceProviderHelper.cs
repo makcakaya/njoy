@@ -2,6 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Njoy.Data;
+using Njoy.Services;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Njoy.Admin.IntegrationTests
 {
@@ -19,11 +23,11 @@ namespace Njoy.Admin.IntegrationTests
         {
             var services = new ServiceCollection();
 
-            services.AddIdentity<AdminUser, AdminRole>()
-                         .AddEntityFrameworkStores<AdminContext>()
+            services.AddIdentity<AppUser, AppRole>()
+                         .AddEntityFrameworkStores<NjoyContext>()
                          .AddDefaultTokenProviders();
 
-            services.AddDbContext<AdminContext>(options =>
+            services.AddDbContext<NjoyContext>(options =>
             {
                 options.ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 var result = useSqlServer ? options.UseSqlServer(SqlConnectionString)
@@ -41,12 +45,38 @@ namespace Njoy.Admin.IntegrationTests
                 options.User.RequireUniqueEmail = false;
             });
 
-            return new ServiceProviderHelper(services.BuildServiceProvider());
+            services.AddScoped<IUserService, UserService>();
+
+            var helper = new ServiceProviderHelper(services.BuildServiceProvider());
+
+            var blocker = new ManualResetEvent(false);
+            helper.CreateRolesAsync().ContinueWith((t) =>
+            {
+                blocker.Set();
+            });
+            blocker.WaitOne();
+
+            return helper;
         }
 
         public T Get<T>()
         {
             return _serviceProvider.GetService<T>();
+        }
+
+        private async Task CreateRolesAsync()
+        {
+            // TODO: Create predefined roles on startup
+            var roleManager = this.Get<RoleManager<AppRole>>();
+            var roles = new string[] { AppRole.AdminRoot, AppRole.AdminStandart, AppRole.Sales };
+
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    IdentityAssert.ThrowIfFailed(await roleManager.CreateAsync(new AppRole { Name = role }), $"Create {role} role");
+                }
+            }
         }
     }
 }

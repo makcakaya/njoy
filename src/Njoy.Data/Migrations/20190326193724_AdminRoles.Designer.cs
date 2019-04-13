@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Njoy.Admin;
+using Njoy.Data;
 
-namespace Njoy.Admin.Migrations
+namespace Njoy.Data.Migrations
 {
-    [DbContext(typeof(AdminContext))]
+    [DbContext(typeof(NjoyContext))]
     [Migration("20190326193724_AdminRoles")]
     partial class AdminRoles
     {

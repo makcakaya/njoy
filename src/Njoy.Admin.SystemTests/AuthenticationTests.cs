@@ -39,8 +39,8 @@ namespace Njoy.Admin.SystemTests
             var request = new CreateAdminUserFeature.Request
             {
                 Username = "user123",
-                NewPassword = password,
-                NewPasswordConfirm = password
+                Password = password,
+                PasswordConfirm = password
             };
 
             var response = await _client.PostAsync("api/adminuser/create",
