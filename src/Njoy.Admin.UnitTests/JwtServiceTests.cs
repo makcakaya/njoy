@@ -83,7 +83,7 @@ namespace Njoy.Admin.UnitTests
 
             private readonly IList<string> Roles = new List<string>
             {
-                AppRole.AdminStandart
+                AppRole.AdminStandard
             };
 
             public Task<AppUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)

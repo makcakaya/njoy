@@ -36,8 +36,6 @@ namespace Njoy.Admin.Features
 
         public sealed class Request : IRequest<AdminUserRowModel>, IMapper<CreateUserRequest>
         {
-            public string Id { get; set; }
-
             [Required]
             public string Username { get; set; }
 

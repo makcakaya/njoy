@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Njoy.Data;
 using Njoy.Services;
-using System.Threading;
-using System.Threading.Tasks;
+using SimpleInjector;
+using SimpleInjector.Lifestyles;
 
 namespace Njoy.Admin.IntegrationTests
 {
@@ -21,6 +23,10 @@ namespace Njoy.Admin.IntegrationTests
 
         public static ServiceProviderHelper CreateInstance<T>(bool useSqlServer = false)
         {
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.Development.json")
+                .Build();
+
             var services = new ServiceCollection();
 
             services.AddIdentity<AppUser, AppRole>()
@@ -46,37 +52,32 @@ namespace Njoy.Admin.IntegrationTests
             });
 
             services.AddScoped<IUserService, UserService>();
+            services.CustomAddContext(config);
+            services.CustomAddIdentity(config.GetSection("JwtSettings").Get<JwtSettings>());
+            var container = services.CustomAddSimpleInjector();
 
             var helper = new ServiceProviderHelper(services.BuildServiceProvider());
+            container.RegisterMediator();
+            container.AutoCrossWireAspNetComponents(helper._serviceProvider);
+            SimpleInjectorExtensions.RegisterConfigurations(container, config);
 
-            var blocker = new ManualResetEvent(false);
-            helper.CreateRolesAsync().ContinueWith((t) =>
-            {
-                blocker.Set();
-            });
-            blocker.WaitOne();
+            RunCustomStartupTasks(container);
 
             return helper;
+        }
+
+        private static void RunCustomStartupTasks(Container container)
+        {
+            using (AsyncScopedLifestyle.BeginScope(container))
+            {
+                var mediator = container.GetService<IMediator>();
+                CustomStartupTasksExtensions.Run(mediator);
+            }
         }
 
         public T Get<T>()
         {
             return _serviceProvider.GetService<T>();
-        }
-
-        private async Task CreateRolesAsync()
-        {
-            // TODO: Create predefined roles on startup
-            var roleManager = this.Get<RoleManager<AppRole>>();
-            var roles = new string[] { AppRole.AdminRoot, AppRole.AdminStandart, AppRole.Sales };
-
-            foreach (var role in roles)
-            {
-                if (!await roleManager.RoleExistsAsync(role))
-                {
-                    IdentityAssert.ThrowIfFailed(await roleManager.CreateAsync(new AppRole { Name = role }), $"Create {role} role");
-                }
-            }
         }
     }
 }

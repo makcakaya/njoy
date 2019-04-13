@@ -25,7 +25,7 @@ namespace Njoy.Admin.IntegrationTests
                 FirstName = "AdminName",
                 LastName = "AdminSurname",
                 Email = "admin@test.com",
-                Role = AppRole.AdminStandart
+                Role = AppRole.AdminStandard
             };
 
             var createdUser = await handler.Handle(request, new CancellationToken());
@@ -49,7 +49,7 @@ namespace Njoy.Admin.IntegrationTests
                 FirstName = "AdminName",
                 LastName = "AdminSurname",
                 Email = "admin@test.com",
-                Role = AppRole.AdminStandart
+                Role = AppRole.AdminStandard
             };
 
             var handler = GetHandler(ServiceProviderHelper.CreateInstance<CreateAdminUserFeatureTests>());

@@ -14,7 +14,7 @@ namespace Njoy.Admin
             {
                 var policy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRole.AdminStandart)
+                    .RequireRole(AppRole.AdminRoot, AppRole.AdminStandard)
                     .Build();
 
                 config.Filters.Add(new AuthorizeFilter(policy));

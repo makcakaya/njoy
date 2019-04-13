@@ -32,8 +32,7 @@ namespace Njoy.Services
             {
                 if (DoesUserNameExist(param.Username))
                 {
-                    throw new OperationFailedException(
-                        $"{nameof(AppUser)} with username {param.Username} already exist.");
+                    throw new OperationFailedException($"{nameof(AppUser)} with username {param.Username} already exist.");
                 }
 
                 var user = new AppUser
@@ -48,12 +47,6 @@ namespace Njoy.Services
 
                 await AddClaim(user, ClaimTypes.GivenName, param.FirstName);
                 await AddClaim(user, ClaimTypes.Surname, param.LastName);
-
-                // TODO: Create predefined roles on startup
-                //if (!await _roleManager.RoleExistsAsync(AppRole.Sales))
-                //{
-                //    IdentityAssert.ThrowIfFailed(await _roleManager.CreateAsync(new AppRole { Name = AppRole.Sales }), "Create Sales role");
-                //}
 
                 IdentityAssert.ThrowIfFailed(
                     await _userManager.AddToRoleAsync(user, param.Role),
@@ -70,11 +63,6 @@ namespace Njoy.Services
             username = username ?? throw new ArgumentNullException(nameof(username));
 
             return _userManager.Users.Any(u => u.UserName == username);
-        }
-
-        public async Task<bool> DoesAdminRootExist()
-        {
-            return (await _userManager.GetUsersInRoleAsync(AppRole.AdminRoot)).Count() > 0;
         }
 
         private async Task AddClaim(AppUser user, string claimType, string value)

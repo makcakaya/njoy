@@ -11,6 +11,9 @@ namespace Njoy.Admin.IntegrationTests
     {
         #region Init
 
+        // WARNING: The same instance of ServiceProviderHelper should be used to avoid running startup tasks everytime (creating users, roles etc)
+        private ServiceProviderHelper ServiceProvider { get; } = ServiceProviderHelper.CreateInstance<TransactionTests>(useSqlServer: true);
+
         public TransactionTests()
         {
             CleanUsersTable();
@@ -18,8 +21,7 @@ namespace Njoy.Admin.IntegrationTests
 
         private void CleanUsersTable()
         {
-            var context = ServiceProviderHelper.CreateInstance<TransactionTests>(useSqlServer: true)
-                .Get<NjoyContext>();
+            var context = ServiceProvider.Get<NjoyContext>();
             context.Users.RemoveRange(context.Users.ToArray());
             context.SaveChanges();
         }
@@ -29,12 +31,10 @@ namespace Njoy.Admin.IntegrationTests
         [Fact]
         public async void Transaction_Rollback_Undoes_Changes()
         {
-            var serviceProvider = ServiceProviderHelper.CreateInstance<TransactionTests>(useSqlServer: true);
-
             const string username = "testuser123";
-            await CreateUser(serviceProvider, username, true);
+            await CreateUser(ServiceProvider, username, true);
 
-            var userManager = serviceProvider.Get<UserManager<AppUser>>();
+            var userManager = ServiceProvider.Get<UserManager<AppUser>>();
 
             Assert.Empty(userManager.Users);
         }
@@ -42,12 +42,10 @@ namespace Njoy.Admin.IntegrationTests
         [Fact]
         public async void Transaction_Commit_Applies_Changes()
         {
-            var serviceProvider = ServiceProviderHelper.CreateInstance<TransactionTests>(useSqlServer: true);
-
             const string username = "testuser1234";
-            await CreateUser(serviceProvider, username, false);
+            await CreateUser(ServiceProvider, username, false);
 
-            var userManager = serviceProvider.Get<UserManager<AppUser>>();
+            var userManager = ServiceProvider.Get<UserManager<AppUser>>();
             var user = userManager.Users.FirstOrDefault(u => u.UserName == username);
 
             Assert.NotNull(user);
