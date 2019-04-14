@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Moq;
 using Njoy.Data;
 using System;
 using System.Collections.Generic;
@@ -53,147 +54,37 @@ namespace Njoy.Admin.UnitTests
 
         private static UserManager<AppUser> GetUserManager()
         {
-            return new UserManager<AppUser>(
-                new CustomUserStore(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-                );
-        }
-
-        private sealed class CustomUserStore : IUserClaimStore<AppUser>, IUserRoleStore<AppUser>
-        {
-            private static readonly AppUser User = new AppUser
+            var user = new AppUser
             {
                 Id = Guid.NewGuid().ToString(),
                 UserName = Username,
                 Email = Email
             };
 
-            private readonly IList<Claim> Claims = new List<Claim>()
+            IList<Claim> claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.GivenName, "givenname"),
                 new Claim(ClaimTypes.Surname, "surname"),
             };
 
-            private readonly IList<string> Roles = new List<string>
+            IList<string> roles = new List<string>
             {
                 AppRole.AdminStandard
             };
 
-            public Task<AppUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
-            {
-                return Task.FromResult(User);
-            }
+            var userStore = new Mock<ITestUserStore>();
+            userStore.Setup(u => u.FindByNameAsync(user.UserName, It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(user));
+            userStore.Setup(u => u.GetClaimsAsync(It.IsAny<AppUser>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(claims));
+            userStore.Setup(u => u.GetRolesAsync(It.IsAny<AppUser>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(roles));
 
-            public Task<IList<Claim>> GetClaimsAsync(AppUser user, CancellationToken cancellationToken)
-            {
-                return Task.FromResult(Claims);
-            }
+            return new UserManager<AppUser>(userStore.Object, null, null, null, null, null, null, null, null);
+        }
 
-            public Task<IList<string>> GetRolesAsync(AppUser user, CancellationToken cancellationToken)
-            {
-                return Task.FromResult(Roles);
-            }
-
-            #region NotImplemented
-
-            public Task<string> GetNormalizedUserNameAsync(AppUser user, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<string> GetUserIdAsync(AppUser user, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<string> GetUserNameAsync(AppUser user, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<IList<AppUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<IList<AppUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<bool> IsInRoleAsync(AppUser user, string roleName, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task RemoveClaimsAsync(AppUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task RemoveFromRoleAsync(AppUser user, string roleName, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task ReplaceClaimAsync(AppUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task SetNormalizedUserNameAsync(AppUser user, string normalizedName, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task SetUserNameAsync(AppUser user, string userName, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<IdentityResult> UpdateAsync(AppUser user, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task AddClaimsAsync(AppUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task AddToRoleAsync(AppUser user, string roleName, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<IdentityResult> CreateAsync(AppUser user, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<IdentityResult> DeleteAsync(AppUser user, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<AppUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Dispose()
-            {
-                throw new NotImplementedException();
-            }
-
-            #endregion NotImplemented
+        public interface ITestUserStore : IUserClaimStore<AppUser>, IUserRoleStore<AppUser>
+        {
         }
     }
 }
