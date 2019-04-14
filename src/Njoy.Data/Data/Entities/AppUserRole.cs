@@ -6,5 +6,6 @@ namespace Njoy.Data
     {
         public const string AdminRoot = "AdminRoot";
         public const string AdminStandard = "AdminStandard";
+        public const string Merchant = "Merchant";
     }
 }

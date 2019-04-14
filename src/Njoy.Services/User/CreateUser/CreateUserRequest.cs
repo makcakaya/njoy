@@ -2,7 +2,7 @@
 
 namespace Njoy.Services
 {
-    public sealed class CreateUserRequest : AbstractValidator<CreateUserRequest>
+    public sealed class CreateUserRequest : AbstractValidator<CreateUserRequest>, IUserRegistrationModel
     {
         public string Username { get; set; }
         public string Password { get; set; }
@@ -14,9 +14,9 @@ namespace Njoy.Services
 
         public CreateUserRequest()
         {
-            RuleFor(x => x.Username).NotEmpty().MinimumLength(4);
-            RuleFor(x => x.Password).NotEmpty().Equal(x => x.PasswordConfirm);
-            RuleFor(x => x.Email).NotEmpty().EmailAddress();
+            RuleFor(x => x.Username).MinimumLength(4);
+            RuleFor(x => x.Password).Equal(x => x.PasswordConfirm);
+            RuleFor(x => x.Email).EmailAddress();
             RuleFor(x => x.Role).NotEmpty();
         }
     }

@@ -29,7 +29,7 @@ namespace Njoy.Admin.Features
                 var response = await _userService.Create(request.Map());
                 return new AdminUserRowModel
                 {
-                    Id = response.Id
+                    Id = response.User.Id
                 };
             }
         }

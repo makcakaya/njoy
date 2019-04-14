@@ -26,7 +26,7 @@ namespace Njoy.Admin
             {
                 using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
-                    var roles = new List<string> { AppRole.AdminRoot, AppRole.AdminStandard };
+                    var roles = new List<string> { AppRole.AdminRoot, AppRole.AdminStandard, AppRole.Merchant };
                     foreach (var role in roles)
                     {
                         if (!await _roleManager.RoleExistsAsync(role))
