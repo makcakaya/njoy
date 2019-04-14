@@ -23,12 +23,12 @@ namespace Njoy.Admin.IntegrationTests
             var roleManager = serviceProvider.Get<RoleManager<AppRole>>();
             var userService = serviceProvider.Get<IUserService>();
 
-            var users = await CreateBulkUsers(userCount, userManager, roleManager, AppRole.AdminStandart);
+            var users = await CreateBulkUsers(userCount, userManager, roleManager, AppRole.AdminStandard);
 
             // list inserted users
             var request = new ListAdminUsersFeature.Request
             {
-                Roles = new string[] { AppRole.AdminStandart }
+                Roles = new string[] { AppRole.AdminStandard }
             };
             var handler = new ListAdminUsersFeature.Handler(userService);
             var response = await handler.Handle(request, new CancellationToken());

@@ -47,7 +47,7 @@ namespace Njoy.Admin
             using (AsyncScopedLifestyle.BeginScope(_container))
             {
                 var mediator = _container.GetService<IMediator>();
-                Configuration.CreateRootAccount(mediator);
+                CustomStartupTasksExtensions.Run(mediator);
             }
         }
     }

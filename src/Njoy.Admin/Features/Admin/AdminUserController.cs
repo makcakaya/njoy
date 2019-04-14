@@ -2,14 +2,18 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Njoy.Admin.Features;
+using Njoy.Data;
 using System;
 using System.Threading.Tasks;
 
 namespace Njoy.Admin
 {
-    [ApiController, Route("api/[controller]")]
+    [ApiController, Route(Route)]
+    [Authorize(Roles = AppRole.AdminRoot)]
     public sealed class AdminUserController : ControllerBase
     {
+        public const string Route = "api/adminuser";
+
         private readonly IMediator _mediator;
 
         public AdminUserController(IMediator mediator)

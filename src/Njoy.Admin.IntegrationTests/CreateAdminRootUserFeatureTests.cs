@@ -11,68 +11,105 @@ namespace Njoy.Admin.IntegrationTests
 {
     public sealed class CreateAdminRootUserFeatureTests
     {
-        public static readonly AdminRootConfig AdminRootConfig = new AdminRootConfig
+        private ServiceProviderHelper ServiceProvider { get; } = ServiceProviderHelper.CreateInstance<CreateAdminRootUserFeature>();
+
+        public CreateAdminRootUserFeatureTests()
         {
-            Username = "Testadminroot",
-            Password = "TestP@ssword!123",
-            Email = "test@test.com",
-            FirstName = "Admin",
-            LastName = "Root"
-        };
+            var context = ServiceProvider.Get<NjoyContext>();
+            context.Users.RemoveRange(context.Users);
+            context.SaveChanges();
+        }
 
         [Fact]
         public async void Can_Create_Root_User()
         {
-            var serviceProvider = ServiceProviderHelper.CreateInstance<CreateAdminRootUserFeature>();
-            var userManager = serviceProvider.Get<UserManager<AppUser>>();
-            var handler = GetHandler(serviceProvider, AdminRootConfig) as IRequestHandler<CreateAdminRootUserFeature.Request, Unit>;
+            var userManager = ServiceProvider.Get<UserManager<AppUser>>();
+            var adminRootConfig = GetAdminRootConfig();
+            var handler = GetHandler(ServiceProvider, adminRootConfig) as IRequestHandler<CreateAdminRootUserFeature.Request, Unit>;
 
             var request = new CreateAdminRootUserFeature.Request();
             await handler.Handle(request, new CancellationToken());
 
-            var user = userManager.Users.FirstOrDefault(u => u.UserName == AdminRootConfig.Username);
+            var user = userManager.Users.FirstOrDefault(u => u.UserName == adminRootConfig.Username);
             Assert.NotNull(user);
         }
 
         [Fact]
         public async void Created_Root_User_Has_Root_Role()
         {
-            var serviceProvider = ServiceProviderHelper.CreateInstance<CreateAdminRootUserFeature>();
-            var userManager = serviceProvider.Get<UserManager<AppUser>>();
-            var handler = GetHandler(serviceProvider, AdminRootConfig) as IRequestHandler<CreateAdminRootUserFeature.Request, Unit>;
+            var userManager = ServiceProvider.Get<UserManager<AppUser>>();
+            var adminRootConfig = GetAdminRootConfig();
+            var handler = GetHandler(ServiceProvider, adminRootConfig) as IRequestHandler<CreateAdminRootUserFeature.Request, Unit>;
 
             var request = new CreateAdminRootUserFeature.Request();
             await handler.Handle(request, new CancellationToken());
 
-            var user = userManager.Users.FirstOrDefault(u => u.UserName == AdminRootConfig.Username);
+            var user = userManager.Users.FirstOrDefault(u => u.UserName == adminRootConfig.Username);
             var roles = await userManager.GetRolesAsync(user);
 
             Assert.Contains(AppRole.AdminRoot, roles);
         }
 
         [Fact]
-        public async void Does_Not_Create_Duplicate_Root_Users()
+        public async void Does_Not_Create_Multiple_Root_Users_If_Not_Allowed()
         {
-            var serviceProvider = ServiceProviderHelper.CreateInstance<CreateAdminRootUserFeature>();
-            var userManager = serviceProvider.Get<UserManager<AppUser>>();
-            var handler = GetHandler(serviceProvider, AdminRootConfig) as IRequestHandler<CreateAdminRootUserFeature.Request, Unit>;
+            var userManager = ServiceProvider.Get<UserManager<AppUser>>();
+            var adminRootConfig = GetAdminRootConfig();
+            var handler = GetHandler(ServiceProvider, adminRootConfig) as IRequestHandler<CreateAdminRootUserFeature.Request, Unit>;
 
             var request = new CreateAdminRootUserFeature.Request();
             await handler.Handle(request, new CancellationToken());
 
-            AdminRootConfig.Username = "NewTestAdminRoot";
-            handler = GetHandler(serviceProvider, AdminRootConfig) as IRequestHandler<CreateAdminRootUserFeature.Request, Unit>;
+            adminRootConfig.Username = "NewTestAdminRoot";
+            handler = GetHandler(ServiceProvider, adminRootConfig) as IRequestHandler<CreateAdminRootUserFeature.Request, Unit>;
             await handler.Handle(request, new CancellationToken());
 
             var rootUsers = await userManager.GetUsersInRoleAsync(AppRole.AdminRoot);
             Assert.Single(rootUsers);
         }
 
+        [Fact]
+        public async void Creates_Multiple_Root_Users_If_Allowed()
+        {
+            var userManager = ServiceProvider.Get<UserManager<AppUser>>();
+            var adminRootConfig = GetAdminRootConfig();
+            adminRootConfig.AllowMultipleRootUsers = true;
+            var handler = GetHandler(ServiceProvider, adminRootConfig) as IRequestHandler<CreateAdminRootUserFeature.Request, Unit>;
+
+            var request = new CreateAdminRootUserFeature.Request();
+            await handler.Handle(request, new CancellationToken());
+
+            adminRootConfig.Username = "NewTestAdminRoot0";
+            handler = GetHandler(ServiceProvider, adminRootConfig) as IRequestHandler<CreateAdminRootUserFeature.Request, Unit>;
+            await handler.Handle(request, new CancellationToken());
+
+            adminRootConfig.Username = "NewTestAdminRoot1";
+            handler = GetHandler(ServiceProvider, adminRootConfig) as IRequestHandler<CreateAdminRootUserFeature.Request, Unit>;
+            await handler.Handle(request, new CancellationToken());
+
+            var rootUsers = await userManager.GetUsersInRoleAsync(AppRole.AdminRoot);
+            Assert.True(rootUsers.Count > 1);
+        }
+
         private CreateAdminRootUserFeature.Handler GetHandler(ServiceProviderHelper serviceProvider,
             AdminRootConfig adminRootConfig)
         {
             var userService = serviceProvider.Get<IUserService>();
-            return new CreateAdminRootUserFeature.Handler(userService, adminRootConfig);
+            var userManager = serviceProvider.Get<UserManager<AppUser>>();
+            return new CreateAdminRootUserFeature.Handler(userService, userManager, adminRootConfig);
+        }
+
+        private AdminRootConfig GetAdminRootConfig()
+        {
+            return new AdminRootConfig
+            {
+                Username = "Testadminroot",
+                Password = "TestP@ssword!123",
+                Email = "test@test.com",
+                FirstName = "Admin",
+                LastName = "Root",
+                AllowMultipleRootUsers = false
+            };
         }
     }
 }

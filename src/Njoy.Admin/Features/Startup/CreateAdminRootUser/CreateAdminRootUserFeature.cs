@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Njoy.Data;
 using Njoy.Services;
 using System;
@@ -12,11 +13,13 @@ namespace Njoy.Admin.Features
         public sealed class Handler : AsyncRequestHandler<Request>
         {
             private readonly IUserService _userService;
+            private readonly UserManager<AppUser> _userManager;
             private readonly AdminRootConfig _adminRootConfig;
 
-            public Handler(IUserService userService, AdminRootConfig adminRootConfig)
+            public Handler(IUserService userService, UserManager<AppUser> userManager, AdminRootConfig adminRootConfig)
             {
                 _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+                _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
                 _adminRootConfig = adminRootConfig ?? throw new ArgumentNullException(nameof(adminRootConfig));
             }
 
@@ -24,7 +27,26 @@ namespace Njoy.Admin.Features
             {
                 request = request ?? throw new ArgumentNullException(nameof(request));
 
-                if (await _userService.DoesAdminRootExist()) { return; }
+                if (!_adminRootConfig.AllowMultipleRootUsers)
+                {
+                    var existingUsers = await _userManager.GetUsersInRoleAsync(AppRole.AdminRoot);
+                    if (existingUsers.Count > 0) { return; }
+                }
+
+                var existingUser = await _userManager.FindByNameAsync(_adminRootConfig.Username);
+                if (existingUser != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(existingUser);
+                    if (roles.Contains(AppRole.AdminRoot))
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        throw new OperationFailedException(nameof(CreateAdminRootUserFeature),
+                            $"A user with username {_adminRootConfig.Username} already exists and does not have {AppRole.AdminRoot} role.");
+                    }
+                }
 
                 await _userService.Create(
                     new CreateUserRequest

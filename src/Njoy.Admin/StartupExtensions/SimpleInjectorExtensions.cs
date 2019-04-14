@@ -51,7 +51,7 @@ namespace Njoy.Admin
             container.Verify();
         }
 
-        private static void RegisterConfigurations(Container container, IConfiguration configuration)
+        public static void RegisterConfigurations(Container container, IConfiguration configuration)
         {
             T ThrowIfNull<T>(T config) where T : class
             {
