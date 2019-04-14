@@ -1,7 +1,9 @@
-﻿namespace Njoy.Services
+﻿using Njoy.Data;
+
+namespace Njoy.Services
 {
     public sealed class CreateUserResponse
     {
-        public string Id { get; set; }
+        public AppUser User { get; set; }
     }
 }

@@ -54,7 +54,7 @@ namespace Njoy.Services
 
                 transaction.Commit();
 
-                return new CreateUserResponse { Id = user.Id };
+                return new CreateUserResponse { User = user };
             }
         }
 

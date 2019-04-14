@@ -23,7 +23,7 @@ namespace Njoy.Admin.UnitTests
                 Password = "TestP@ssword",
                 PasswordConfirm = "TestP@ssword",
                 Email = "test@test.com",
-                BusinessId = "business123"
+                BusinessCode = "business123"
             };
 
             var mapped = mapper.Map<CreateUserRequest>(appRequest);

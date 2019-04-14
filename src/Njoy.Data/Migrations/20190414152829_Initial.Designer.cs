@@ -10,14 +10,14 @@ using Njoy.Data;
 namespace Njoy.Data.Migrations
 {
     [DbContext(typeof(NjoyContext))]
-    [Migration("20190331150025_IdentityTableRename")]
-    partial class IdentityTableRename
+    [Migration("20190414152829_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
+                .HasAnnotation("ProductVersion", "2.2.4-servicing-10062")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -38,7 +38,7 @@ namespace Njoy.Data.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AdminRoleClaims");
+                    b.ToTable("AppRoleClaims");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -58,7 +58,7 @@ namespace Njoy.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AdminUserClaims");
+                    b.ToTable("AppUserClaims");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -76,7 +76,7 @@ namespace Njoy.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AdminUserLogins");
+                    b.ToTable("AppUserLogins");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -89,7 +89,7 @@ namespace Njoy.Data.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("AdminUserRoles");
+                    b.ToTable("AppUserRoles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -104,10 +104,10 @@ namespace Njoy.Data.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("AdminUserTokens");
+                    b.ToTable("AppUserTokens");
                 });
 
-            modelBuilder.Entity("Njoy.Admin.AdminRole", b =>
+            modelBuilder.Entity("Njoy.Data.AppRole", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -128,10 +128,10 @@ namespace Njoy.Data.Migrations
                         .HasName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("AdminRoles");
+                    b.ToTable("AppRoles");
                 });
 
-            modelBuilder.Entity("Njoy.Admin.AdminUser", b =>
+            modelBuilder.Entity("Njoy.Data.AppUser", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
@@ -179,12 +179,79 @@ namespace Njoy.Data.Migrations
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("AdminUsers");
+                    b.ToTable("AppUsers");
+                });
+
+            modelBuilder.Entity("Njoy.Data.Business", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Code");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasFilter("[Code] IS NOT NULL");
+
+                    b.ToTable("Businesses");
+                });
+
+            modelBuilder.Entity("Njoy.Data.BusinessMerchant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("BusinessId");
+
+                    b.Property<int?>("BusinessId1");
+
+                    b.Property<int>("MerchantId");
+
+                    b.Property<int?>("MerchantId1");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.HasIndex("BusinessId1");
+
+                    b.HasIndex("MerchantId");
+
+                    b.HasIndex("MerchantId1");
+
+                    b.ToTable("BusinessMerchants");
+                });
+
+            modelBuilder.Entity("Njoy.Data.Merchant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Code");
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasFilter("[Code] IS NOT NULL");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.ToTable("Merchants");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("Njoy.Admin.AdminRole")
+                    b.HasOne("Njoy.Data.AppRole")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -192,7 +259,7 @@ namespace Njoy.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Njoy.Admin.AdminUser")
+                    b.HasOne("Njoy.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -200,7 +267,7 @@ namespace Njoy.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Njoy.Admin.AdminUser")
+                    b.HasOne("Njoy.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -208,12 +275,12 @@ namespace Njoy.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.HasOne("Njoy.Admin.AdminRole")
+                    b.HasOne("Njoy.Data.AppRole")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Njoy.Admin.AdminUser")
+                    b.HasOne("Njoy.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -221,10 +288,38 @@ namespace Njoy.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Njoy.Admin.AdminUser")
+                    b.HasOne("Njoy.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Njoy.Data.BusinessMerchant", b =>
+                {
+                    b.HasOne("Njoy.Data.Business", "Business")
+                        .WithMany()
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Njoy.Data.Business")
+                        .WithMany("BusinessMerchants")
+                        .HasForeignKey("BusinessId1");
+
+                    b.HasOne("Njoy.Data.Merchant", "Merchant")
+                        .WithMany()
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Njoy.Data.Merchant")
+                        .WithMany("BusinessMerchants")
+                        .HasForeignKey("MerchantId1");
+                });
+
+            modelBuilder.Entity("Njoy.Data.Merchant", b =>
+                {
+                    b.HasOne("Njoy.Data.AppUser", "User")
+                        .WithOne()
+                        .HasForeignKey("Njoy.Data.Merchant", "UserId");
                 });
 #pragma warning restore 612, 618
         }
