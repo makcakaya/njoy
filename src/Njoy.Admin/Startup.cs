@@ -24,6 +24,7 @@ namespace Njoy.Admin
         public void ConfigureServices(IServiceCollection services)
         {
             _container = services.CustomAddSimpleInjector();
+            services.CustomAddMapper();
             services.CustomAddContext(Configuration);
             services.CustomAddIdentity(_jwtSettings);
             services.CustomAddMvc();
