@@ -44,11 +44,11 @@ namespace Njoy.Admin
                     _context.Set<Merchant>().Add(merchant);
 
                     // Assign it to an existing Business
-                    var business = _context.Set<Business>().FirstOrDefault(b => b.Code == request.BusinessCode);
+                    var business = _context.Set<Business>().FirstOrDefault(b => b.Id == request.BusinessId);
                     if (business is null)
                     {
                         throw new ArgumentException(nameof(CreateMerchantUserFeature),
-                            $"Business with code {request.BusinessCode} does not exist.");
+                            $"Business with code {request.BusinessId} does not exist.");
                     }
                     merchant.BusinessMerchants.Add(new BusinessMerchant
                     {
@@ -72,14 +72,14 @@ namespace Njoy.Admin
             public string PasswordConfirm { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }
-            public string BusinessCode { get; set; }
+            public int BusinessId { get; set; }
 
             public Request()
             {
                 RuleFor(r => r.Username).MinimumLength(UserConfig.MinUsernameLength);
                 RuleFor(r => r.Email).EmailAddress();
                 RuleFor(r => r.Password).MinimumLength(UserConfig.MinPasswordLength).Equal(r => r.PasswordConfirm);
-                RuleFor(r => r.BusinessCode).NotEmpty();
+                RuleFor(r => r.BusinessId).NotEmpty();
             }
         }
     }

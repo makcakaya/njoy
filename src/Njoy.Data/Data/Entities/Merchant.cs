@@ -2,7 +2,7 @@
 
 namespace Njoy.Data
 {
-    public class Merchant : IPublicIdentity
+    public class Merchant : EntityBase
     {
         public string UserId { get; set; }
         public virtual AppUser User { get; set; }
