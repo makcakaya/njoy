@@ -1,7 +1,7 @@
 ﻿using MediatR;
+using Nensure;
 using Newtonsoft.Json;
 using Njoy.Services;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -18,16 +18,13 @@ namespace Njoy.Admin.Features
 
             public Handler(IUserService userService)
             {
-                _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+                Ensure.NotNull(userService);
+                _userService = userService;
             }
 
             public async Task<Unit> Handle(Request request, CancellationToken cancellationToken)
             {
-                if (!request.IsValid())
-                {
-                    throw new ArgumentException("Request is not valid.");
-                }
-
+                Ensure.NotNull(request);
                 await _userService.Edit(request.Map());
                 return Unit.Value;
             }
@@ -53,12 +50,6 @@ namespace Njoy.Admin.Features
 
             [MinLength(6)]
             public string NewPasswordConfirm { get; set; }
-
-            public bool IsValid()
-            {
-                return NewPassword == NewPasswordConfirm
-                    && (NewPassword != null ? CurrentPassword != null : true);
-            }
 
             public EditUserRequest Map()
             {

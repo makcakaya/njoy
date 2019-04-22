@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Nensure;
 using Njoy.Admin.Features;
 using Njoy.Data;
-using System;
 using System.Threading.Tasks;
 
 namespace Njoy.Admin
@@ -18,7 +18,8 @@ namespace Njoy.Admin
 
         public AdminUserController(IMediator mediator)
         {
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            Ensure.NotNull(mediator);
+            _mediator = mediator;
         }
 
         [HttpPost, Route("create")]

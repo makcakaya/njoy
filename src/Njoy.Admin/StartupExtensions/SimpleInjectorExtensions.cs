@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Nensure;
 using Njoy.Services;
 using SimpleInjector;
 using SimpleInjector.Integration.AspNetCore.Mvc;
@@ -35,6 +36,7 @@ namespace Njoy.Admin
         public static void CustomUseSimpleInjector(this IApplicationBuilder app, Container container,
             IConfiguration configuration)
         {
+            Ensure.NotNull(container, configuration);
             container.RegisterMvcControllers(app);
             container.RegisterMvcViewComponents(app);
             container.RegisterMediator();
@@ -53,6 +55,7 @@ namespace Njoy.Admin
 
         public static void RegisterConfigurations(Container container, IConfiguration configuration)
         {
+            Ensure.NotNull(container, configuration);
             T ThrowIfNull<T>(T config) where T : class
             {
                 return config ?? throw new InvalidOperationException($"Configuration {typeof(T).FullName} is not found.");

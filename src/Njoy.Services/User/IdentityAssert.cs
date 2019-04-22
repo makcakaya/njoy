@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
+using Nensure;
 
 namespace Njoy.Services
 {
@@ -7,9 +7,7 @@ namespace Njoy.Services
     {
         public static void ThrowIfFailed(IdentityResult result, string operation)
         {
-            result = result ?? throw new ArgumentNullException(nameof(result));
-            operation = operation ?? throw new ArgumentNullException(nameof(operation));
-
+            Ensure.NotNull(result);
             if (!result.Succeeded)
             {
                 throw new OperationFailedException(operation, result.Errors);

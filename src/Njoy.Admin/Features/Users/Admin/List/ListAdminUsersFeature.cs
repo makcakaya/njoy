@@ -1,6 +1,6 @@
 ﻿using MediatR;
+using Nensure;
 using Njoy.Services;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -16,15 +16,14 @@ namespace Njoy.Admin.Features
 
             public Handler(IUserService userService)
             {
-                _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+                Ensure.NotNull(userService);
+                _userService = userService;
             }
 
             public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
             {
-                request = request ?? throw new ArgumentNullException(nameof(request));
-
+                Ensure.NotNull(request);
                 var result = await _userService.Get(request.Map());
-
                 return new Response
                 {
                     Users = result.Users.Select(u => new Response.Record

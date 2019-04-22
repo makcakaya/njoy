@@ -1,7 +1,7 @@
 ﻿using MediatR;
+using Nensure;
 using Newtonsoft.Json;
 using Njoy.Services;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,16 +16,13 @@ namespace Njoy.Admin.Features
 
             public Handler(IUserService userService)
             {
-                _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+                Ensure.NotNull(userService);
+                _userService = userService;
             }
 
             public async Task<AdminUserRowModel> Handle(Request request, CancellationToken cancellationToken)
             {
-                if (!request.IsValid())
-                {
-                    throw new ArgumentException("Request is not valid.");
-                }
-
+                Ensure.True(request.IsValid());
                 var response = await _userService.Create(request.Map());
                 return new AdminUserRowModel
                 {

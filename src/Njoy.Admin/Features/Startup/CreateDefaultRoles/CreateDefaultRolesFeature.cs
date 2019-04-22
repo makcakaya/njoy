@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Nensure;
 using Njoy.Data;
 using Njoy.Services;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,8 +18,9 @@ namespace Njoy.Admin
 
             public Handler(NjoyContext context, RoleManager<AppRole> roleManager)
             {
-                _context = context ?? throw new ArgumentNullException(nameof(context));
-                _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
+                Ensure.NotNull(context).NotNull(roleManager);
+                _context = context;
+                _roleManager = roleManager;
             }
 
             protected override async Task Handle(Request request, CancellationToken cancellationToken)

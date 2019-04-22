@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using System;
+using Nensure;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,13 +14,13 @@ namespace Njoy.Admin.Features
 
             public Handler(IJwtService jwtService)
             {
-                _jwtService = jwtService ?? throw new ArgumentNullException(nameof(jwtService));
+                Ensure.NotNull(jwtService);
+                _jwtService = jwtService;
             }
 
             public async Task<string> Handle(Request request, CancellationToken cancellationToken)
             {
-                request = request ?? throw new ArgumentNullException(nameof(request));
-
+                Ensure.NotNull(request);
                 return await _jwtService.GenerateToken(request.Username, request.Password);
             }
         }

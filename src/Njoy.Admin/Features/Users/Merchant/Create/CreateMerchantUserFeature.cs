@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using MediatR;
+using Nensure;
 using Njoy.Data;
 using Njoy.Services;
 using System;
@@ -20,15 +21,15 @@ namespace Njoy.Admin
 
             public Handler(IUserService userService, IMapper mapper, NjoyContext context)
             {
-                _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-                _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-                _context = context ?? throw new ArgumentNullException(nameof(context));
+                Ensure.NotNull(userService).NotNull(mapper).NotNull(context);
+                _userService = userService;
+                _mapper = mapper;
+                _context = context;
             }
 
             public async Task<Unit> Handle(Request request, CancellationToken cancellationToken)
             {
-                if (request is null) { throw new ArgumentNullException(nameof(request)); }
-
+                Ensure.NotNull(request);
                 using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
                     // Create user
