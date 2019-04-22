@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using MediatR;
+using Nensure;
 using Njoy.Data;
 using Njoy.Services;
 using System;
@@ -20,15 +21,15 @@ namespace Njoy.Admin
 
             public Handler(IUserService userService, IMapper mapper, NjoyContext context)
             {
-                _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-                _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-                _context = context ?? throw new ArgumentNullException(nameof(context));
+                Ensure.NotNull(userService).NotNull(mapper).NotNull(context);
+                _userService = userService;
+                _mapper = mapper;
+                _context = context;
             }
 
             public async Task<Unit> Handle(Request request, CancellationToken cancellationToken)
             {
-                if (request is null) { throw new ArgumentNullException(nameof(request)); }
-
+                Ensure.NotNull(request);
                 using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
                     // Create user
@@ -44,11 +45,11 @@ namespace Njoy.Admin
                     _context.Set<Merchant>().Add(merchant);
 
                     // Assign it to an existing Business
-                    var business = _context.Set<Business>().FirstOrDefault(b => b.Code == request.BusinessCode);
+                    var business = _context.Set<Business>().FirstOrDefault(b => b.Id == request.BusinessId);
                     if (business is null)
                     {
                         throw new ArgumentException(nameof(CreateMerchantUserFeature),
-                            $"Business with code {request.BusinessCode} does not exist.");
+                            $"Business with code {request.BusinessId} does not exist.");
                     }
                     merchant.BusinessMerchants.Add(new BusinessMerchant
                     {
@@ -72,14 +73,14 @@ namespace Njoy.Admin
             public string PasswordConfirm { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }
-            public string BusinessCode { get; set; }
+            public int BusinessId { get; set; }
 
             public Request()
             {
                 RuleFor(r => r.Username).MinimumLength(UserConfig.MinUsernameLength);
                 RuleFor(r => r.Email).EmailAddress();
                 RuleFor(r => r.Password).MinimumLength(UserConfig.MinPasswordLength).Equal(r => r.PasswordConfirm);
-                RuleFor(r => r.BusinessCode).NotEmpty();
+                RuleFor(r => r.BusinessId).NotEmpty();
             }
         }
     }

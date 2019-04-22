@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Nensure;
 
 namespace Njoy.Admin
 {
@@ -8,6 +9,7 @@ namespace Njoy.Admin
         public static void CustomUseExceptionHandling(this IApplicationBuilder app,
             IHostingEnvironment environment)
         {
+            Ensure.NotNull(environment);
             if (environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

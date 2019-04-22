@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Nensure;
 using Njoy.Data;
 using System;
 using System.Text;
@@ -13,6 +14,7 @@ namespace Njoy.Admin
     {
         public static void CustomAddIdentity(this IServiceCollection services, JwtSettings jwtSettings)
         {
+            Ensure.NotNull(jwtSettings);
             services.AddIdentity<AppUser, AppRole>()
                 .AddEntityFrameworkStores<NjoyContext>()
                 .AddDefaultTokenProviders();

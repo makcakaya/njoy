@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Nensure;
 using Njoy.Data;
 using System;
 using System.Collections.Generic;
@@ -18,12 +19,14 @@ namespace Njoy.Admin
 
         public JwtService(JwtSettings settings, UserManager<AppUser> userManager)
         {
-            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            Ensure.NotNull(settings).NotNull(userManager);
+            _settings = settings;
+            _userManager = userManager;
         }
 
         public async Task<string> GenerateToken(string username, string password)
         {
+            Ensure.NotNullOrWhitespace(username).NotNullOrWhitespace(password);
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_settings.Secret);
 
@@ -45,6 +48,7 @@ namespace Njoy.Admin
 
         private async Task<ClaimsIdentity> CreateClaimsIdentity(AppUser user)
         {
+            Ensure.NotNull(user);
             var claims = new List<Claim>(await _userManager.GetClaimsAsync(user));
             var roles = await _userManager.GetRolesAsync(user);
             claims.AddRange(roles.Select(r => new Claim(ClaimsIdentity.DefaultRoleClaimType, r)));

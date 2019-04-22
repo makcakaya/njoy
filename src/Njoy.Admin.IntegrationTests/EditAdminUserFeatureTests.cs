@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Njoy.Admin.Features;
 using Njoy.Data;
 using Njoy.Services;
-using System;
 using System.Security.Claims;
 using System.Threading;
 using Xunit;
@@ -114,7 +114,7 @@ namespace Njoy.Admin.IntegrationTests
             };
 
             var handler = GetHandler(serviceProvider);
-            await Assert.ThrowsAsync<ArgumentException>(async () => await handler.Handle(request, new CancellationToken()));
+            await Assert.ThrowsAsync<ValidationException>(async () => await handler.Handle(request, new CancellationToken()));
         }
 
         private EditAdminUserFeature.Handler GetHandler(ServiceProviderHelper serviceProvider)

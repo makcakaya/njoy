@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Nensure;
 using Njoy.Data;
 using Njoy.Services;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,15 +18,15 @@ namespace Njoy.Admin.Features
 
             public Handler(IUserService userService, UserManager<AppUser> userManager, AdminRootConfig adminRootConfig)
             {
-                _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-                _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-                _adminRootConfig = adminRootConfig ?? throw new ArgumentNullException(nameof(adminRootConfig));
+                Ensure.NotNull(userService).NotNull(userManager).NotNull(adminRootConfig);
+                _userService = userService;
+                _userManager = userManager;
+                _adminRootConfig = adminRootConfig;
             }
 
             protected async override Task Handle(Request request, CancellationToken cancellationToken)
             {
-                request = request ?? throw new ArgumentNullException(nameof(request));
-
+                Ensure.NotNull(request);
                 if (!_adminRootConfig.AllowMultipleRootUsers)
                 {
                     var existingUsers = await _userManager.GetUsersInRoleAsync(AppRole.AdminRoot);

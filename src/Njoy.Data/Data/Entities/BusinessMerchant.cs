@@ -1,8 +1,7 @@
 ﻿namespace Njoy.Data
 {
-    public sealed class BusinessMerchant
+    public sealed class BusinessMerchant : EntityBase
     {
-        public int Id { get; set; }
         public int MerchantId { get; set; }
         public Merchant Merchant { get; set; }
         public int BusinessId { get; set; }

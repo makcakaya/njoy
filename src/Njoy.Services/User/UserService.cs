@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Nensure;
 using Njoy.Data;
 using System;
 using System.Collections.Generic;
@@ -18,16 +19,16 @@ namespace Njoy.Services
         public UserService(NjoyContext context, UserManager<AppUser> userManager,
             RoleManager<AppRole> roleManager)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-            _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
+            Ensure.NotNull(context, userManager, roleManager);
+            _context = context;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public async Task<CreateUserResponse> Create(CreateUserRequest param)
         {
-            param = param ?? throw new ArgumentNullException(nameof(param));
+            Ensure.NotNull(param);
             param.ValidateAndThrow(param);
-
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 if (DoesUserNameExist(param.Username))
@@ -60,26 +61,14 @@ namespace Njoy.Services
 
         public bool DoesUserNameExist(string username)
         {
-            username = username ?? throw new ArgumentNullException(nameof(username));
-
+            Ensure.NotNullOrWhitespace(username);
             return _userManager.Users.Any(u => u.UserName == username);
-        }
-
-        private async Task AddClaim(AppUser user, string claimType, string value)
-        {
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                var result = await _userManager.AddClaimAsync(user, new Claim(claimType, value));
-                IdentityAssert.ThrowIfFailed(result, $"Adding claim {claimType}");
-            }
-            return;
         }
 
         public async Task Edit(EditUserRequest request)
         {
-            request = request ?? throw new ArgumentNullException(nameof(request));
+            Ensure.NotNull(request);
             request.ValidateAndThrow(request);
-
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 var user = await _userManager.FindByIdAsync(request.Id);
@@ -103,33 +92,12 @@ namespace Njoy.Services
                 }
 
                 transaction.Commit();
-                return;
-            }
-
-            throw new NotImplementedException();
-        }
-
-        private async void UpdateClaim(AppUser user, IEnumerable<Claim> claims, string claimType, string value)
-        {
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                var claim = claims.FirstOrDefault(c => c.Type == claimType);
-                if (claim != null)
-                {
-                    var result = await _userManager.ReplaceClaimAsync(user, claim, new Claim(claimType, value));
-                    IdentityAssert.ThrowIfFailed(result, $"Updating claim {claimType}");
-                }
-                else
-                {
-                    await AddClaim(user, claimType, value);
-                }
             }
         }
 
         public async Task<GetUsersResponse> Get(GetUsersRequest request)
         {
-            request = request ?? throw new ArgumentNullException(nameof(request));
-
+            Ensure.NotNull(request);
             var result = new List<AppUser>();
             foreach (var role in request.Roles)
             {
@@ -145,6 +113,34 @@ namespace Njoy.Services
                     Email = u.Email
                 })
             };
+        }
+
+        private async void UpdateClaim(AppUser user, IEnumerable<Claim> claims, string claimType, string value)
+        {
+            Ensure.NotNull(user);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                var claim = claims.FirstOrDefault(c => c.Type == claimType);
+                if (claim != null)
+                {
+                    var result = await _userManager.ReplaceClaimAsync(user, claim, new Claim(claimType, value));
+                    IdentityAssert.ThrowIfFailed(result, $"Updating claim {claimType}");
+                }
+                else
+                {
+                    await AddClaim(user, claimType, value);
+                }
+            }
+        }
+
+        private async Task AddClaim(AppUser user, string claimType, string value)
+        {
+            Ensure.NotNull(user);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                var result = await _userManager.AddClaimAsync(user, new Claim(claimType, value));
+                IdentityAssert.ThrowIfFailed(result, $"Adding claim {claimType}");
+            }
         }
     }
 }

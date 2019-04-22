@@ -2,7 +2,7 @@
 
 namespace Njoy.Data
 {
-    public class Business : IPublicIdentity
+    public class Business : EntityBase
     {
         public virtual ICollection<BusinessMerchant> BusinessMerchants { get; set; }
     }

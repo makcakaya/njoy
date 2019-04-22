@@ -8,7 +8,6 @@ namespace Njoy.Data
         public void Configure(EntityTypeBuilder<Business> builder)
         {
             builder.ToTable("Businesses").HasKey(b => b.Id);
-            builder.HasIndex(b => b.Code).IsUnique();
             builder.HasMany(b => b.BusinessMerchants);
         }
     }
