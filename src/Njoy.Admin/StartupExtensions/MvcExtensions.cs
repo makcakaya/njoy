@@ -22,6 +22,8 @@ namespace Njoy.Admin
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .CustomAddValidation();
+
+            services.CustomAddExceptionHandling();
         }
     }
 }
