@@ -36,10 +36,5 @@ namespace Njoy.Services
                 throw;
             }
         }
-
-        public Task InvokeAsync(DefaultHttpContext defaultHttpContext)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

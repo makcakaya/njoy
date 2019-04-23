@@ -62,5 +62,27 @@ namespace Njoy.Services.UnitTests
             Assert.Equal((int)HttpStatusCode.OK, context.Response.StatusCode);
             Assert.Null(thrownException);
         }
+
+        [Fact]
+        public async void Bypasses_If_Not_Configured()
+        {
+            var middleware = new ExceptionHandlingMiddleware();
+            var responseBodyStream = new MemoryStream();
+            var context = new DefaultHttpContext();
+            context.Features.Get<IHttpResponseFeature>().Body = responseBodyStream;
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await middleware.InvokeAsync(context,
+                   new RequestDelegate(c => throw new InvalidOperationException("Invalid operation.")));
+            });
+
+            responseBodyStream.Position = 0;
+            var responseBody = await new StreamReader(responseBodyStream).ReadToEndAsync();
+            var thrownException = JsonConvert.DeserializeObject<DivideByZeroException>(responseBody);
+
+            Assert.Equal((int)HttpStatusCode.OK, context.Response.StatusCode);
+            Assert.Null(thrownException);
+        }
     }
 }
