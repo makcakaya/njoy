@@ -19,6 +19,7 @@ namespace Njoy.Admin
             IHostingEnvironment environment)
         {
             Ensure.NotNull(environment);
+            GlobalConfiguration
             ExceptionHandlingMiddleware.Configure(GetExceptionResponders());
             app.UseMiddleware<ExceptionHandlingMiddleware>();
             if (environment.IsDevelopment())
