@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 
-namespace Njoy.Admin
+namespace Njoy.Services
 {
     public interface ILogger
     {
