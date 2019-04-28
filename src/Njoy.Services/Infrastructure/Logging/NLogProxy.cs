@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using MsLog = Microsoft.Extensions.Logging;
 
-namespace Njoy.Admin
+namespace Njoy.Services
 {
     public sealed class NLogProxy<T> : ILogger
     {

@@ -1,4 +1,5 @@
-﻿using SimpleInjector;
+﻿using Njoy.Services;
+using SimpleInjector;
 using Xunit;
 
 namespace Njoy.Admin.IntegrationTests

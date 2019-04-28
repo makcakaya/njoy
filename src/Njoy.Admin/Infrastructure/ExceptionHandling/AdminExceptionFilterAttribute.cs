@@ -1,24 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
-using Nensure;
-using Newtonsoft.Json;
+using Njoy.Services;
 using System.Threading.Tasks;
 
 namespace Njoy.Admin
 {
-    public sealed class AdminExceptionFilterAttribute : ExceptionFilterAttribute
+    public sealed class AdminExceptionFilterAttribute : ExceptionFilterAttribute, IConfigurableFilter<ILogger>
     {
-        private readonly ILogger _logger;
+        private ILogger _logger = new NLogProxy<AdminExceptionFilterAttribute>();
 
-        public AdminExceptionFilterAttribute(ILogger logger)
+        public void Configure(ILogger logger)
         {
-            Ensure.NotNull(logger);
             _logger = logger;
         }
 
         public override Task OnExceptionAsync(ExceptionContext context)
         {
             // Just log the context and let the global exception handler do the rest.
-            _logger.Log(Microsoft.Extensions.Logging.LogLevel.Error, context.Exception, JsonConvert.SerializeObject(context));
+            _logger.Log(Microsoft.Extensions.Logging.LogLevel.Error, context.Exception, "Unhandled exception", context);
             return Task.CompletedTask;
         }
     }

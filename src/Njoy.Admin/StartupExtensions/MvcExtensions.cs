@@ -14,7 +14,6 @@ namespace Njoy.Admin
                 .AddMvc(config =>
                 {
                     config.Filters.Add<AdminExceptionFilterAttribute>();
-
                     var policy = new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
                         .RequireRole(AppRole.AdminRoot, AppRole.AdminStandard)
@@ -23,7 +22,6 @@ namespace Njoy.Admin
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                 .CustomAddValidation();
-
             services.CustomAddExceptionHandling();
         }
     }
