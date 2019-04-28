@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
+using Nensure;
 using Njoy.Data;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -21,11 +23,33 @@ namespace Njoy.Admin.UnitTests
         private static readonly string Issuer = "TestIssuer";
         private static readonly string Audience = "TestAudience";
 
+        private static readonly AppUser User = new AppUser
+        {
+            Id = Guid.NewGuid().ToString(),
+            UserName = Username,
+            Email = Email
+        };
+
+        private static readonly IList<Claim> Claims = new List<Claim>()
+        {
+            new Claim(ClaimTypes.GivenName, "givenname"),
+            new Claim(ClaimTypes.Surname, "surname"),
+        };
+
+        private static readonly IList<string> Roles = new List<string>
+        {
+            AppRole.AdminStandard
+        };
+
         [Fact]
         public async void Can_Generate_Token()
         {
-            var userManager = GetUserManager();
-            var service = new JwtService(new JwtSettings { Secret = Secret }, userManager);
+            var userManager = GetMockUserManager();
+            userManager.Setup(u => u.FindByNameAsync(Username)).Returns(() => Task.FromResult(User));
+            userManager.Setup(u => u.CheckPasswordAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns(() => Task.FromResult(true));
+            userManager.Setup(u => u.GetClaimsAsync(User)).Returns(() => Task.FromResult(Claims));
+            userManager.Setup(u => u.GetRolesAsync(User)).Returns(() => Task.FromResult(Roles));
+            var service = new JwtService(new JwtSettings { Secret = Secret }, userManager.Object);
             var token = await service.GenerateToken(Username, Password);
 
             Assert.NotEmpty(token);
@@ -34,7 +58,11 @@ namespace Njoy.Admin.UnitTests
         [Fact]
         public async void Generated_Token_Includes_Issuer_And_Audience()
         {
-            var userManager = GetUserManager();
+            var userManager = GetMockUserManager();
+            userManager.Setup(u => u.FindByNameAsync(Username)).Returns(() => Task.FromResult(User));
+            userManager.Setup(u => u.CheckPasswordAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns(() => Task.FromResult(true));
+            userManager.Setup(u => u.GetClaimsAsync(User)).Returns(() => Task.FromResult(Claims));
+            userManager.Setup(u => u.GetRolesAsync(User)).Returns(() => Task.FromResult(Roles));
             var service = new JwtService(
                 new JwtSettings
                 {
@@ -42,7 +70,7 @@ namespace Njoy.Admin.UnitTests
                     Issuer = Issuer,
                     Audience = Audience
                 },
-                userManager);
+                userManager.Object);
 
             var token = await service.GenerateToken(Username, Password);
             var handler = new JwtSecurityTokenHandler();
@@ -52,39 +80,40 @@ namespace Njoy.Admin.UnitTests
             Assert.Equal(Audience, securityToken.Audiences.First());
         }
 
-        private static UserManager<AppUser> GetUserManager()
+        [Fact]
+        public async void Throws_If_Credentials_Are_Not_Correct()
         {
-            var user = new AppUser
-            {
-                Id = Guid.NewGuid().ToString(),
-                UserName = Username,
-                Email = Email
-            };
+            var userManager = new Mock<UserManager<AppUser>>(
+                    new Mock<IUserStore<AppUser>>().Object,
+                    new Mock<IOptions<IdentityOptions>>().Object,
+                    new Mock<IPasswordHasher<AppUser>>().Object,
+                    new IUserValidator<AppUser>[0],
+                    new IPasswordValidator<AppUser>[0],
+                    new Mock<ILookupNormalizer>().Object,
+                    new Mock<IdentityErrorDescriber>().Object,
+                    new Mock<IServiceProvider>().Object,
+                    new Mock<ILogger<UserManager<AppUser>>>().Object);
 
-            IList<Claim> claims = new List<Claim>()
-            {
-                new Claim(ClaimTypes.GivenName, "givenname"),
-                new Claim(ClaimTypes.Surname, "surname"),
-            };
+            userManager.Setup(u => u.CheckPasswordAsync(It.IsAny<AppUser>(), It.IsAny<string>()))
+                .Returns(() => Task.FromResult(false));
 
-            IList<string> roles = new List<string>
-            {
-                AppRole.AdminStandard
-            };
-
-            var userStore = new Mock<ITestUserStore>();
-            userStore.Setup(u => u.FindByNameAsync(user.UserName, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(user));
-            userStore.Setup(u => u.GetClaimsAsync(It.IsAny<AppUser>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(claims));
-            userStore.Setup(u => u.GetRolesAsync(It.IsAny<AppUser>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(roles));
-
-            return new UserManager<AppUser>(userStore.Object, null, null, null, null, null, null, null, null);
+            var jwtService = new JwtService(new JwtSettings { Secret = Secret }, userManager.Object);
+            await Assert.ThrowsAsync<AssertionException>(async () => await jwtService.GenerateToken("invalidusername", "Inv@lidPassword!123"));
         }
 
-        public interface ITestUserStore : IUserClaimStore<AppUser>, IUserRoleStore<AppUser>
+        private static Mock<UserManager<AppUser>> GetMockUserManager()
         {
+            var userManager = new Mock<UserManager<AppUser>>(
+                    new Mock<IUserStore<AppUser>>().Object,
+                    new Mock<IOptions<IdentityOptions>>().Object,
+                    new Mock<IPasswordHasher<AppUser>>().Object,
+                    new IUserValidator<AppUser>[0],
+                    new IPasswordValidator<AppUser>[0],
+                    new Mock<ILookupNormalizer>().Object,
+                    new Mock<IdentityErrorDescriber>().Object,
+                    new Mock<IServiceProvider>().Object,
+                    new Mock<ILogger<UserManager<AppUser>>>().Object);
+            return userManager;
         }
     }
 }
