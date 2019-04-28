@@ -26,13 +26,14 @@ namespace Njoy.Admin
 
         public async Task<string> GenerateToken(string username, string password)
         {
-            Ensure.NotNullOrWhitespace(username).NotNullOrWhitespace(password);
+            Ensure.NotNullOrWhitespace(username, password);
+            var user = await _userManager.FindByNameAsync(username);
+            Ensure.NotNull(user);
+            var passwordValid = await _userManager.CheckPasswordAsync(user, password);
+            Ensure.True(passwordValid);
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_settings.Secret);
-
-            var user = await _userManager.FindByNameAsync(username);
-            if (user is null) { throw new InvalidOperationException($"Username {username} does not exist."); }
-
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = await CreateClaimsIdentity(user),

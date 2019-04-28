@@ -17,8 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Njoy.Services", "src\Njoy.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Njoy.Data", "src\Njoy.Data\Njoy.Data.csproj", "{CC6B5C8B-B8E4-441F-B4EF-53E5E339E1A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Njoy.Services.UnitTests", "src\Njoy.Services.UnitTests\Njoy.Services.UnitTests.csproj", "{A172BD4B-FDE2-4128-BAAF-C101DB994BF2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
