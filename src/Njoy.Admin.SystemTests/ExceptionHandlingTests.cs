@@ -22,7 +22,7 @@ namespace Njoy.Admin.SystemTests
         {
             // Build configuration object
             _config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.Development.json")
+                .AddJsonFile("appsettings.json")
                 .Build();
 
             // Setup & start the server
