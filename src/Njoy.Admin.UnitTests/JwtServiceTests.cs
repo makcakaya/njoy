@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -49,7 +51,11 @@ namespace Njoy.Admin.UnitTests
             userManager.Setup(u => u.CheckPasswordAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns(() => Task.FromResult(true));
             userManager.Setup(u => u.GetClaimsAsync(User)).Returns(() => Task.FromResult(Claims));
             userManager.Setup(u => u.GetRolesAsync(User)).Returns(() => Task.FromResult(Roles));
-            var service = new JwtService(new JwtSettings { Secret = Secret }, userManager.Object);
+
+            var signInManager = GetMockSignInManager(userManager.Object);
+            signInManager.Setup(s => s.CheckPasswordSignInAsync(User, Password, It.IsAny<bool>()))
+                .ReturnsAsync(SignInResult.Success);
+            var service = new JwtService(new JwtSettings { Secret = Secret }, userManager.Object, signInManager.Object);
             var token = await service.GenerateToken(Username, Password);
 
             Assert.NotEmpty(token);
@@ -63,6 +69,11 @@ namespace Njoy.Admin.UnitTests
             userManager.Setup(u => u.CheckPasswordAsync(It.IsAny<AppUser>(), It.IsAny<string>())).Returns(() => Task.FromResult(true));
             userManager.Setup(u => u.GetClaimsAsync(User)).Returns(() => Task.FromResult(Claims));
             userManager.Setup(u => u.GetRolesAsync(User)).Returns(() => Task.FromResult(Roles));
+
+            var signInManager = GetMockSignInManager(userManager.Object);
+            signInManager.Setup(s => s.CheckPasswordSignInAsync(User, Password, It.IsAny<bool>()))
+                .ReturnsAsync(SignInResult.Success);
+
             var service = new JwtService(
                 new JwtSettings
                 {
@@ -70,7 +81,7 @@ namespace Njoy.Admin.UnitTests
                     Issuer = Issuer,
                     Audience = Audience
                 },
-                userManager.Object);
+                userManager.Object, signInManager.Object);
 
             var token = await service.GenerateToken(Username, Password);
             var handler = new JwtSecurityTokenHandler();
@@ -97,8 +108,11 @@ namespace Njoy.Admin.UnitTests
             userManager.Setup(u => u.CheckPasswordAsync(It.IsAny<AppUser>(), It.IsAny<string>()))
                 .Returns(() => Task.FromResult(false));
 
-            var jwtService = new JwtService(new JwtSettings { Secret = Secret }, userManager.Object);
-            await Assert.ThrowsAsync<AssertionException>(async () => await jwtService.GenerateToken("invalidusername", "Inv@lidPassword!123"));
+            var signInManager = GetMockSignInManager(userManager.Object);
+            var jwtService = new JwtService(new JwtSettings { Secret = Secret },
+                userManager.Object, signInManager.Object);
+            await Assert.ThrowsAsync<AssertionException>(async () =>
+                await jwtService.GenerateToken("invalidusername", "Inv@lidPassword!123"));
         }
 
         private static Mock<UserManager<AppUser>> GetMockUserManager()
@@ -114,6 +128,19 @@ namespace Njoy.Admin.UnitTests
                     new Mock<IServiceProvider>().Object,
                     new Mock<ILogger<UserManager<AppUser>>>().Object);
             return userManager;
+        }
+
+        private static Mock<SignInManager<AppUser>> GetMockSignInManager(UserManager<AppUser> userManager)
+        {
+            var signInManager = new Mock<SignInManager<AppUser>>(
+                userManager,
+                new Mock<IHttpContextAccessor>().Object,
+                new Mock<IUserClaimsPrincipalFactory<AppUser>>().Object,
+                new Mock<IOptions<IdentityOptions>>().Object,
+                new Mock<ILogger<SignInManager<AppUser>>>().Object,
+                new Mock<IAuthenticationSchemeProvider>().Object
+                );
+            return signInManager;
         }
     }
 }
