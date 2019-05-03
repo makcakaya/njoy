@@ -15,13 +15,16 @@ namespace Njoy.Admin
     public sealed class JwtService : IJwtService
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
         private readonly JwtSettings _settings;
 
-        public JwtService(JwtSettings settings, UserManager<AppUser> userManager)
+        public JwtService(JwtSettings settings, UserManager<AppUser> userManager,
+            SignInManager<AppUser> signInManager)
         {
-            Ensure.NotNull(settings).NotNull(userManager);
+            Ensure.NotNull(settings, userManager, signInManager);
             _settings = settings;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public async Task<string> GenerateToken(string username, string password)
@@ -29,8 +32,8 @@ namespace Njoy.Admin
             Ensure.NotNullOrWhitespace(username, password);
             var user = await _userManager.FindByNameAsync(username);
             Ensure.NotNull(user);
-            var passwordValid = await _userManager.CheckPasswordAsync(user, password);
-            Ensure.True(passwordValid);
+            var signInResult = await _signInManager.CheckPasswordSignInAsync(user, password, true);
+            Ensure.True(signInResult.Succeeded);
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_settings.Secret);

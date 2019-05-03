@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="appsettings.Development.json" />
+    <None Remove="appsettings.json" />
     <None Remove="nlog.config" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="appsettings.Development.json">
+    <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

@@ -13,7 +13,7 @@ namespace Njoy.Admin.IntegrationTests
 {
     public class ServiceProviderHelper
     {
-        private static readonly string SqlConnectionString = "Server=localhost; Database=Njoy.Test; Trusted_Connection=true";
+        //private static readonly string SqlConnectionString = "Server=localhost; Database=Njoy.Test; Trusted_Connection=true";
         private readonly ServiceProvider _serviceProvider;
 
         private ServiceProviderHelper(ServiceProvider serviceProvider)
@@ -23,20 +23,17 @@ namespace Njoy.Admin.IntegrationTests
 
         public static ServiceProviderHelper CreateInstance<T>(bool useSqlServer = false)
         {
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.Development.json")
-                .Build();
-
             var services = new ServiceCollection();
 
             services.AddIdentity<AppUser, AppRole>()
                          .AddEntityFrameworkStores<NjoyContext>()
                          .AddDefaultTokenProviders();
 
+            var config = ConfigurationHelper.Get();
             services.AddDbContext<NjoyContext>(options =>
             {
                 options.ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                var result = useSqlServer ? options.UseSqlServer(SqlConnectionString)
+                var result = useSqlServer ? options.UseSqlServer(config.GetConnectionString("DefaultConnection"))
                     : options.UseInMemoryDatabase(databaseName: $"{nameof(T)}");
             });
 
