@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Nensure;
 using Njoy.Data;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,51 @@ namespace Njoy.Services
             {
                 Assert.Contains(result, m => m.User.UserName == usernames[i]);
             }
+        }
+
+        [Fact]
+        public async void Get_Returns_By_Merchant_Id()
+        {
+            var context = GetContext();
+            var user = new AppUser
+            {
+                UserName = "testusername"
+            };
+            context.Set<AppUser>().Add(user);
+
+            var merchant = new Merchant
+            {
+                User = user
+            };
+            context.Set<Merchant>().Add(merchant);
+            context.SaveChanges();
+
+            var service = new MerchantService(context);
+            var result = await service.Get(merchant.Id);
+
+            Assert.NotNull(result);
+            Assert.Equal(merchant.UserId, user.Id);
+        }
+
+        [Fact]
+        public async void Get_Does_Not_Throw_If_Id_Not_Found()
+        {
+            var context = GetContext();
+            var service = new MerchantService(context);
+
+            var result = await service.Get(13);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async void Search_Throws_If_Search_Phrase_Is_Null_Or_Empty()
+        {
+            var context = GetContext();
+            var service = new MerchantService(context);
+
+            await Assert.ThrowsAsync<AssertionException>(() => service.Search(string.Empty));
+            await Assert.ThrowsAsync<AssertionException>(() => service.Search(null));
         }
 
         private NjoyContext GetContext()

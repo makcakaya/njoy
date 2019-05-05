@@ -46,6 +46,7 @@ namespace Njoy.Admin
             // Register custom dependencies (services etc)
             container.Register<IJwtService, JwtService>();
             container.Register<IUserService, UserService>();
+            container.Register<IMerchantService, MerchantService>();
 
             // Register configuration objects
             RegisterConfigurations(container, configuration);

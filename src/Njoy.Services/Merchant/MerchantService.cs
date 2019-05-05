@@ -24,6 +24,7 @@ namespace Njoy.Services
 
         public async Task<IEnumerable<Merchant>> Search(string username)
         {
+            Ensure.NotNullOrEmpty(username);
             return await _context.Set<Merchant>()
                 .Where(m => m.User.NormalizedUserName.Contains(username.ToUpper()))
                 .ToArrayAsync();
