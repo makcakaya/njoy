@@ -23,5 +23,17 @@ namespace Njoy.Admin
         {
             await _mediator.Send(request);
         }
+
+        [HttpGet, Route("search")]
+        public async Task Search(SearchMerchantsFeature.Request request)
+        {
+            await _mediator.Send(request);
+        }
+
+        [HttpGet, Route("get")]
+        public async Task Get(GetMerchantFeature.Request request)
+        {
+            await _mediator.Send(request);
+        }
     }
 }

@@ -49,6 +49,7 @@ namespace Njoy.Admin.IntegrationTests
             });
 
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IMerchantService, MerchantService>();
             services.CustomAddContext(config);
             services.CustomAddIdentity(config.GetSection("JwtSettings").Get<JwtSettings>());
             var container = services.CustomAddSimpleInjector();
