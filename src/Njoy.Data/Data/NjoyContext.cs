@@ -21,6 +21,7 @@ namespace Njoy.Data
             builder.ApplyConfiguration(new MerchantConfig());
             builder.ApplyConfiguration(new BusinessConfig());
             builder.ApplyConfiguration(new BusinessMerchantConfig());
+            builder.ApplyConfiguration(new BusinessSubscriptionConfig());
         }
     }
 }
