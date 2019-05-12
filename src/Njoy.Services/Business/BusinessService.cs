@@ -36,9 +36,9 @@ namespace Njoy.Services
                     StreetAddress = createAddress.StreetAddress,
                 };
                 _context.Set<BusinessAddress>().Add(address);
+
                 _context.SaveChanges();
                 transaction.Commit();
-
                 return business;
             }
         }

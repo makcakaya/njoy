@@ -11,6 +11,8 @@ namespace Njoy.Services
         public CreateBusinessParam()
         {
             RuleFor(o => o.Name).NotEmpty();
+            RuleFor(o => o.Contact).Must(oo => oo.Validate(oo).IsValid).When(o => o.Contact != null);
+            RuleFor(o => o.Address).Must(oo => oo.Validate(oo).IsValid).When(o => o.Address != null);
         }
     }
 }
