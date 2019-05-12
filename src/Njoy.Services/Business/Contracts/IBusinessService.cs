@@ -1,9 +1,12 @@
 ﻿using Njoy.Data;
+using System.Threading.Tasks;
 
 namespace Njoy.Services
 {
     public interface IBusinessService
     {
-        Business Create(CreateBusinessParam createBusiness);
+        Task<Business> Create(CreateBusinessParam createBusiness);
+
+        Task<BusinessAddress> CreateAddress(CreateBusinessAddressParam address, int businessId);
     }
 }

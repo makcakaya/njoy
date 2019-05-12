@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Nensure;
 using Njoy.Data;
+using System.Threading.Tasks;
 
 namespace Njoy.Services
 {
@@ -14,33 +15,40 @@ namespace Njoy.Services
             _context = context;
         }
 
-        public Business Create(CreateBusinessParam createBusiness)
+        public async Task<Business> Create(CreateBusinessParam createBusiness)
         {
             Ensure.NotNull(createBusiness);
-            createBusiness.ValidateAndThrow(createBusiness);
+            await createBusiness.ValidateAndThrowAsync(createBusiness);
 
-            using (var transaction = _context.Database.BeginTransaction())
+            var business = new Business
             {
-                var business = new Business
-                {
-                    Name = createBusiness.Name,
-                };
-                _context.Set<Business>().Add(business);
+                Name = createBusiness.Name,
+            };
+            await _context.Set<Business>().AddAsync(business);
+            await _context.SaveChangesAsync();
 
-                var createAddress = createBusiness.Address;
-                var address = new BusinessAddress
-                {
-                    Business = business,
-                    DistrictId = createAddress.DistrictId,
-                    PostalCode = createAddress.PostalCode,
-                    StreetAddress = createAddress.StreetAddress,
-                };
-                _context.Set<BusinessAddress>().Add(address);
-
-                _context.SaveChanges();
-                transaction.Commit();
-                return business;
+            if (createBusiness.Address != null)
+            {
+                await CreateAddress(createBusiness.Address, business.Id);
             }
+            return business;
+        }
+
+        public async Task<BusinessAddress> CreateAddress(CreateBusinessAddressParam createAddress, int businessId)
+        {
+            Ensure.NotNull(createAddress);
+            createAddress.ValidateAndThrow(createAddress);
+
+            var address = new BusinessAddress
+            {
+                BusinessId = businessId,
+                DistrictId = createAddress.DistrictId,
+                PostalCode = createAddress.PostalCode,
+                StreetAddress = createAddress.StreetAddress,
+            };
+            await _context.Set<BusinessAddress>().AddAsync(address);
+            await _context.SaveChangesAsync();
+            return address;
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Njoy.Services
 {
-    public sealed class CreateBusinessParam : AbstractValidator<CreateBusinessParam>
+    public class CreateBusinessParam : AbstractValidator<CreateBusinessParam>
     {
         public string Name { get; set; }
         public CreateBusinessContactParam Contact { get; set; }
