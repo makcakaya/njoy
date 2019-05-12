@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using Nensure;
 using Njoy.Data;
-using System;
 
 namespace Njoy.Services
 {
@@ -19,9 +18,28 @@ namespace Njoy.Services
         {
             Ensure.NotNull(createBusiness);
             createBusiness.ValidateAndThrow(createBusiness);
+
             using (var transaction = _context.Database.BeginTransaction())
             {
-                throw new NotImplementedException();
+                var business = new Business
+                {
+                    Name = createBusiness.Name,
+                };
+                _context.Set<Business>().Add(business);
+
+                var createAddress = createBusiness.Address;
+                var address = new BusinessAddress
+                {
+                    Business = business,
+                    DistrictId = createAddress.DistrictId,
+                    PostalCode = createAddress.PostalCode,
+                    StreetAddress = createAddress.StreetAddress,
+                };
+                _context.Set<BusinessAddress>().Add(address);
+                _context.SaveChanges();
+                transaction.Commit();
+
+                return business;
             }
         }
     }
