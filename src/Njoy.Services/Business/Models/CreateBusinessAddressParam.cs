@@ -11,7 +11,6 @@ namespace Njoy.Services
 
         public CreateBusinessAddressParam()
         {
-            RuleFor(e => e.BusinessId).NotEmpty();
             RuleFor(e => e.DistrictId).NotEmpty();
             RuleFor(e => e.PostalCode).NotEmpty();
             RuleFor(e => e.StreetAddress).NotEmpty();

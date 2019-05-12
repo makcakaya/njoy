@@ -7,6 +7,6 @@ namespace Njoy.Services
     {
         Task<Business> Create(CreateBusinessParam createBusiness);
 
-        Task<BusinessAddress> CreateAddress(CreateBusinessAddressParam address, int businessId);
+        Task<BusinessAddress> CreateAddress(CreateBusinessAddressParam address);
     }
 }

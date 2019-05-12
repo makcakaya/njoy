@@ -29,19 +29,20 @@ namespace Njoy.Services
 
             if (createBusiness.Address != null)
             {
-                await CreateAddress(createBusiness.Address, business.Id);
+                createBusiness.Address.BusinessId = business.Id;
+                await CreateAddress(createBusiness.Address);
             }
             return business;
         }
 
-        public async Task<BusinessAddress> CreateAddress(CreateBusinessAddressParam createAddress, int businessId)
+        public async Task<BusinessAddress> CreateAddress(CreateBusinessAddressParam createAddress)
         {
             Ensure.NotNull(createAddress);
             createAddress.ValidateAndThrow(createAddress);
 
             var address = new BusinessAddress
             {
-                BusinessId = businessId,
+                BusinessId = createAddress.BusinessId,
                 DistrictId = createAddress.DistrictId,
                 PostalCode = createAddress.PostalCode,
                 StreetAddress = createAddress.StreetAddress,
