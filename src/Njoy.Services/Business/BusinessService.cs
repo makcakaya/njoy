@@ -1,4 +1,5 @@
-﻿using Nensure;
+﻿using FluentValidation;
+using Nensure;
 using Njoy.Data;
 using System;
 
@@ -17,6 +18,7 @@ namespace Njoy.Services
         public Business Create(CreateBusinessParam createBusiness)
         {
             Ensure.NotNull(createBusiness);
+            createBusiness.ValidateAndThrow(createBusiness);
             using (var transaction = _context.Database.BeginTransaction())
             {
                 throw new NotImplementedException();

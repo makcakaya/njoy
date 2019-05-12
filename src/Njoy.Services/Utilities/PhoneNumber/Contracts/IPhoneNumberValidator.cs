@@ -2,6 +2,6 @@
 {
     public interface IPhoneNumberValidator
     {
-        bool IsValid(string phoneNumber, string defaultRegion);
+        bool IsValid(string phoneNumber, string defaultRegion = null);
     }
 }

@@ -10,6 +10,7 @@ namespace Njoy.Services
         public CreateBusinessContactParam()
         {
             RuleFor(o => o.Email).EmailAddress().Unless(o => string.IsNullOrWhiteSpace(o.Email));
+            RuleFor(o => o.Phone).Must(number => PhoneNumberUtility.Validator.IsValid(number));
         }
     }
 }
