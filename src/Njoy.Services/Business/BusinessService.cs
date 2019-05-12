@@ -1,5 +1,6 @@
 ﻿using Nensure;
 using Njoy.Data;
+using System;
 
 namespace Njoy.Services
 {
@@ -18,7 +19,7 @@ namespace Njoy.Services
             Ensure.NotNull(createBusiness);
             using (var transaction = _context.Database.BeginTransaction())
             {
-                _context.Set<Business>.
+                throw new NotImplementedException();
             }
         }
     }
