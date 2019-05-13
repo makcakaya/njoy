@@ -3,19 +3,21 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Njoy.Data;
 
 namespace Njoy.Data.Migrations
 {
     [DbContext(typeof(NjoyContext))]
-    partial class NjoyContextModelSnapshot : ModelSnapshot
+    [Migration("20190509110013_BusinessSubscriptionsAdded")]
+    partial class BusinessSubscriptionsAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
+                .HasAnnotation("ProductVersion", "2.2.4-servicing-10062")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -186,35 +188,9 @@ namespace Njoy.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Name");
-
                     b.HasKey("Id");
 
                     b.ToTable("Businesses");
-                });
-
-            modelBuilder.Entity("Njoy.Data.BusinessAddress", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("BusinessId");
-
-                    b.Property<int>("DistrictId");
-
-                    b.Property<string>("PostalCode");
-
-                    b.Property<string>("StreetAddress");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BusinessId")
-                        .IsUnique();
-
-                    b.HasIndex("DistrictId");
-
-                    b.ToTable("BusinessAddresses");
                 });
 
             modelBuilder.Entity("Njoy.Data.BusinessMerchant", b =>
@@ -265,58 +241,6 @@ namespace Njoy.Data.Migrations
                     b.HasIndex("BusinessId");
 
                     b.ToTable("BusinessSubscriptions");
-                });
-
-            modelBuilder.Entity("Njoy.Data.City", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("LicensePlateCode");
-
-                    b.Property<string>("Name")
-                        .IsRequired();
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Cities");
-                });
-
-            modelBuilder.Entity("Njoy.Data.County", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("CityId");
-
-                    b.Property<string>("Name")
-                        .IsRequired();
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CityId");
-
-                    b.ToTable("Counties");
-                });
-
-            modelBuilder.Entity("Njoy.Data.District", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("CountyId");
-
-                    b.Property<string>("Name")
-                        .IsRequired();
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CountyId");
-
-                    b.ToTable("Districts");
                 });
 
             modelBuilder.Entity("Njoy.Data.Merchant", b =>
@@ -381,19 +305,6 @@ namespace Njoy.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Njoy.Data.BusinessAddress", b =>
-                {
-                    b.HasOne("Njoy.Data.Business", "Business")
-                        .WithOne("Address")
-                        .HasForeignKey("Njoy.Data.BusinessAddress", "BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Njoy.Data.District", "District")
-                        .WithMany()
-                        .HasForeignKey("DistrictId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Njoy.Data.BusinessMerchant", b =>
                 {
                     b.HasOne("Njoy.Data.Business", "Business")
@@ -420,22 +331,6 @@ namespace Njoy.Data.Migrations
                     b.HasOne("Njoy.Data.Business", "Business")
                         .WithMany()
                         .HasForeignKey("BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Njoy.Data.County", b =>
-                {
-                    b.HasOne("Njoy.Data.City", "City")
-                        .WithMany()
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("Njoy.Data.District", b =>
-                {
-                    b.HasOne("Njoy.Data.County", "County")
-                        .WithMany()
-                        .HasForeignKey("CountyId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
