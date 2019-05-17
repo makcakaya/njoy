@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Configuration;
 using Nensure;
 using Njoy.Admin.Features;
 using Njoy.Services;
@@ -9,11 +10,15 @@ namespace Njoy.Admin
 {
     public static class CustomStartupTasksExtensions
     {
-        public static void Run(IMediator mediator)
+        public static void Run(IMediator mediator, IConfiguration configuration)
         {
             Ensure.NotNull(mediator);
             RunRequest(mediator, new CreateDefaultRolesFeature.Request());
             RunRequest(mediator, new CreateAdminRootUserFeature.Request());
+            RunRequest(mediator, new CreateAddressPartsFeature.Request
+            {
+                Cities = configuration.GetSection("AddressParts").Get<AddressPartsConfig>().Cities
+            });
         }
 
         private static void RunRequest(IMediator mediator, IRequest request)
@@ -35,7 +40,7 @@ namespace Njoy.Admin
 
             if (exception != null)
             {
-                throw new OperationFailedException(nameof(CreateAdminRootUserFeature), exception);
+                throw new OperationFailedException(request.GetType().FullName, exception);
             }
         }
     }

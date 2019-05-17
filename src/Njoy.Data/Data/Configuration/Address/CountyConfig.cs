@@ -10,6 +10,7 @@ namespace Njoy.Data
             builder.ToTable("Counties");
             builder.Property(e => e.Name).IsRequired();
             builder.HasOne(e => e.City).WithMany().HasForeignKey(e => e.CityId);
+            builder.HasAlternateKey(e => new { e.Name, e.CityId });
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Nensure;
 using Njoy.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Njoy.Services
@@ -72,6 +73,21 @@ namespace Njoy.Services
                 Id = district.Id,
                 Name = district.Name
             };
+        }
+
+        public Task<City> GetCity(string name)
+        {
+            return _context.Set<City>().ToAsyncEnumerable().FirstOrDefault(e => e.Name == name);
+        }
+
+        public Task<County> GetCounty(int cityId, string name)
+        {
+            return _context.Set<County>().ToAsyncEnumerable().FirstOrDefault(e => e.Name == name && e.CityId == cityId);
+        }
+
+        public Task<District> GetDistrict(int countyId, string name)
+        {
+            return _context.Set<District>().ToAsyncEnumerable().FirstOrDefault(e => e.Name == name && e.CountyId == countyId);
         }
     }
 }

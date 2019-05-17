@@ -48,6 +48,7 @@ namespace Njoy.Admin
             container.Register<IUserService, UserService>();
             container.Register<IMerchantService, MerchantService>();
             container.Register<IBusinessService, BusinessService>();
+            container.Register<IAddressService, AddressService>();
 
             // Register configuration objects
             RegisterConfigurations(container, configuration);

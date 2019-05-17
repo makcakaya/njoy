@@ -10,6 +10,8 @@ namespace Njoy.Data
             builder.ToTable("Cities");
             builder.Property(e => e.Name).IsRequired();
             builder.Property(e => e.LicensePlateCode).IsRequired();
+            builder.HasAlternateKey(e => e.Name);
+            builder.HasAlternateKey(e => e.LicensePlateCode);
         }
     }
 }
