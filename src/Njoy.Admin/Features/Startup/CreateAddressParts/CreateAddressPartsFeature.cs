@@ -10,7 +10,7 @@ namespace Njoy.Admin
 {
     public sealed class CreateAddressPartsFeature
     {
-        public sealed class Handler : AsyncRequestHandler<Request>
+        public sealed class Handler : IRequestHandler<Request>
         {
             private readonly NjoyContext _context;
             private readonly IAddressService _addressService;
@@ -22,10 +22,9 @@ namespace Njoy.Admin
                 _addressService = addressService;
             }
 
-            protected override async Task Handle(Request request, CancellationToken cancellationToken)
+            public async Task<Unit> Handle(Request request, CancellationToken cancellationToken)
             {
                 Ensure.NotNull(request);
-
                 using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
                     if (request.Cities == null) { return; }
@@ -72,6 +71,7 @@ namespace Njoy.Admin
                         }
                     }
                     transaction.Commit();
+                    return Unit.Value;
                 }
             }
         }
