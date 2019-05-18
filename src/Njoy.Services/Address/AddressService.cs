@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using Nensure;
 using Njoy.Data;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -78,6 +80,12 @@ namespace Njoy.Services
         public Task<City> GetCity(string name)
         {
             return _context.Set<City>().ToAsyncEnumerable().FirstOrDefault(e => e.Name == name);
+        }
+
+        public async Task<IEnumerable<City>> GetCities(Func<City, bool> predicate = null)
+        {
+            return predicate == null ? _context.Set<City>().ToArray()
+                : await _context.Set<City>().ToAsyncEnumerable().Where(predicate).ToArray();
         }
 
         public Task<County> GetCounty(int cityId, string name)

@@ -1,4 +1,6 @@
 ﻿using Njoy.Data;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Njoy.Services
@@ -12,6 +14,8 @@ namespace Njoy.Services
         Task<CreateDistrictResponse> Create(CreateDistrictRequest createDistrict);
 
         Task<City> GetCity(string name);
+
+        Task<IEnumerable<City>> GetCities(Func<City, bool> predicate = null);
 
         Task<County> GetCounty(int cityId, string name);
 
