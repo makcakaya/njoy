@@ -12,7 +12,7 @@ namespace Njoy.Admin
     {
         public static void Run(IMediator mediator, IConfiguration configuration)
         {
-            Ensure.NotNull(mediator);
+            Ensure.NotNull(mediator, configuration);
             RunRequest(mediator, new CreateDefaultRolesFeature.Request());
             RunRequest(mediator, new CreateAdminRootUserFeature.Request());
             RunRequest(mediator, new CreateAddressPartsFeature.Request
@@ -21,7 +21,7 @@ namespace Njoy.Admin
             });
         }
 
-        private static void RunRequest(IMediator mediator, IRequest request)
+        private static void RunRequest<TResponse>(IMediator mediator, IRequest<TResponse> request)
         {
             Ensure.NotNull(mediator).NotNull(request);
             Exception exception = null;
@@ -42,6 +42,11 @@ namespace Njoy.Admin
             {
                 throw new OperationFailedException(request.GetType().FullName, exception);
             }
+        }
+
+        private static void RunRequest(IMediator mediator, IRequest request)
+        {
+            RunRequest(mediator, (IRequest<Unit>)request);
         }
     }
 }

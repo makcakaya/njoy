@@ -10,7 +10,7 @@ namespace Njoy.Admin
     [Authorize(Roles = AppRole.AdminStandard)]
     public sealed class BusinessController : ControllerBase
     {
-        public const string Route = "api/adminuser";
+        public const string Route = "api/business";
         private readonly IMediator _mediator;
 
         public BusinessController(IMediator mediator)

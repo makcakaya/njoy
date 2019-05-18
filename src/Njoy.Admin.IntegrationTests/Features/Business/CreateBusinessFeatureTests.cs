@@ -1,11 +1,10 @@
-﻿using Njoy.Admin.IntegrationTests;
-using Njoy.Data;
+﻿using Njoy.Data;
 using Njoy.Services;
 using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace Njoy.Admin
+namespace Njoy.Admin.IntegrationTests
 {
     public sealed class CreateBusinessFeatureTests
     {

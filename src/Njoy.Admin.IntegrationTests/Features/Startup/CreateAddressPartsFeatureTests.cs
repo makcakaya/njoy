@@ -14,7 +14,8 @@ namespace Njoy.Admin.IntegrationTests
         {
             var context = ServiceProvider.Get<NjoyContext>();
             var addressService = ServiceProvider.Get<IAddressService>();
-            var handler = new CreateAddressPartsFeature.Handler(context, addressService);
+            var logger = ServiceProvider.Get<ILogger>();
+            var handler = new CreateAddressPartsFeature.Handler(context, addressService, logger);
             var request = new CreateAddressPartsFeature.Request
             {
                 Cities = null

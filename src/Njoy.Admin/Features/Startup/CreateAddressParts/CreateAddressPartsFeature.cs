@@ -10,24 +10,31 @@ namespace Njoy.Admin
 {
     public sealed class CreateAddressPartsFeature
     {
-        public sealed class Handler : IRequestHandler<Request>
+        public sealed class Handler : IRequestHandler<Request, Response>
         {
             private readonly NjoyContext _context;
             private readonly IAddressService _addressService;
+            private readonly ILogger _logger;
 
-            public Handler(NjoyContext context, IAddressService addressService)
+            public Handler(NjoyContext context, IAddressService addressService, ILogger logger)
             {
-                Ensure.NotNull(context, addressService);
+                Ensure.NotNull(context, addressService, logger);
                 _context = context;
                 _addressService = addressService;
+                _logger = logger;
             }
 
-            public async Task<Unit> Handle(Request request, CancellationToken cancellationToken)
+            public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
             {
                 Ensure.NotNull(request);
+                if (request.Cities is null)
+                {
+                    _logger.Log(Microsoft.Extensions.Logging.LogLevel.Information, "There is no city to be created. Skipping.");
+                    return new Response();
+                }
+
                 using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
-                    if (request.Cities == null) { return; }
                     foreach (var city in request.Cities)
                     {
                         var loadedCity = await _addressService.GetCity(city.Name);
@@ -54,6 +61,7 @@ namespace Njoy.Admin
                                     Name = county.Name,
                                     CityId = cityId
                                 });
+                                countyId = response.Id;
                             }
 
                             if (county.Districts is null) { continue; }
@@ -70,13 +78,14 @@ namespace Njoy.Admin
                             }
                         }
                     }
+                    _context.SaveChanges();
                     transaction.Commit();
-                    return Unit.Value;
+                    return new Response();
                 }
             }
         }
 
-        public sealed class Request : IRequest
+        public sealed class Request : IRequest<Response>
         {
             public IEnumerable<City> Cities { get; set; }
 
@@ -97,6 +106,10 @@ namespace Njoy.Admin
             {
                 public string Name { get; set; }
             }
+        }
+
+        public sealed class Response
+        {
         }
     }
 }

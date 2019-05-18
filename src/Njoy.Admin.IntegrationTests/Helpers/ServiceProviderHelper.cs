@@ -52,12 +52,14 @@ namespace Njoy.Admin.IntegrationTests
             services.AddScoped<IMerchantService, MerchantService>();
             services.AddScoped<IBusinessService, BusinessService>();
             services.AddScoped<IAddressService, AddressService>();
+            services.AddScoped<IConfiguration>((s) => ConfigurationHelper.Get());
             services.CustomAddContext(config);
             services.CustomAddIdentity(config.GetSection("JwtSettings").Get<JwtSettings>());
             var container = services.CustomAddSimpleInjector();
 
             var helper = new ServiceProviderHelper(services.BuildServiceProvider());
             container.RegisterMediator();
+            container.RegisterNLog();
             container.AutoCrossWireAspNetComponents(helper._serviceProvider);
             SimpleInjectorExtensions.RegisterConfigurations(container, config);
 
@@ -71,7 +73,8 @@ namespace Njoy.Admin.IntegrationTests
             using (AsyncScopedLifestyle.BeginScope(container))
             {
                 var mediator = container.GetService<IMediator>();
-                CustomStartupTasksExtensions.Run(mediator);
+                var configuration = container.GetService<IConfiguration>();
+                CustomStartupTasksExtensions.Run(mediator, configuration);
             }
         }
 
