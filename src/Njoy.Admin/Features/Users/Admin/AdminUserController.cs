@@ -35,7 +35,7 @@ namespace Njoy.Admin
         }
 
         [HttpGet, Route("list")]
-        public async Task<ListAdminUsersFeature.Response> List(ListAdminUsersFeature.Request request)
+        public async Task<ListAdminUsersFeature.Response> List([FromQuery]ListAdminUsersFeature.Request request)
         {
             return await _mediator.Send(request);
         }
